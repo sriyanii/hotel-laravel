@@ -1,93 +1,133 @@
 @extends('layouts.adminlte')
-
 @section('title', 'Daftar Booking')
-
 @section('content')
 <div class="container py-4">
-    <div class="card shadow rounded-4 border-0">
-        <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
-            <h4 class="mb-0 fw-bold text-primary">
-                <i class="fas fa-bed me-2"></i>Data Booking
+    <div class="card shadow-sm border-0 rounded-lg overflow-hidden">
+        <!-- HEADER -->
+        <div class="card-header bg-pink-gradient text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">
+                <i class="fas fa-bed me-2"></i> Daftar Booking
             </h4>
-            <a href="{{ route(auth()->user()->role . '.bookings.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Tambah Booking
+            <a href="{{ route(auth()->user()->role . '.bookings.create') }}" class="btn btn-light text-pink fw-semibold">
+                <i class="fas fa-plus me-1"></i> Tambah Booking
             </a>
         </div>
-        <div class="card-body table-responsive">
-            @if(session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
-            <table class="table table-bordered table-striped">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>Tamu</th>
-                        <th>No. Telepon</th>
-                        <th>No. Identitas</th>
-                        <th>Kamar</th>
-                        <th>Check In</th>
-                        <th>Check Out</th>
-                        <th>Status</th>
-                        <th>Total Harga</th>
-                        <th>Dibuat Oleh</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($bookings as $index => $booking)
-                        <tr>
-                            <td>{{ $index + 1 }}</td>
-                            <td>{{ $booking->guest->name ?? '-' }}</td>
-                            <td>{{ $booking->guest->phone ?? '-' }}</td>
-                            <td>{{ $booking->guest->identity_number ?? '-' }}</td>
-                            <td>
-                                {{ $booking->room->number ?? '-' }}
-                                (Rp{{ number_format($booking->room->price ?? 0, 0, ',', '.') }}/malam)
-                            </td>
-                            <td>{{ $booking->check_in }}</td>
-                            <td>{{ $booking->check_out }}</td>
-                            <td>
-                                <span class="badge 
-                                    {{ $booking->status == 'booked' ? 'bg-warning' : '' }}
-                                    {{ $booking->status == 'check-in' ? 'bg-success' : '' }}
-                                    {{ $booking->status == 'cancelled' ? 'bg-danger' : '' }}
-                                ">
-                                    {{ ucfirst($booking->status) }}
-                                </span>
-                            </td>
-                            <td>
-                                @if($booking->total_price > 0)
-                                    Rp{{ number_format($booking->total_price, 0, ',', '.') }}
-                                    <small class="text-muted">({{ $booking->check_out->diffInDays($booking->check_in) }} malam)</small>
-                                @else
-                                    -
-                                @endif
-                            </td>
-                            <td>{{ $booking->user->name ?? '-' }}</td>
-                            <td>
-                                <a href="{{ route(auth()->user()->role . '.bookings.edit', $booking->id) }}" class="btn btn-sm btn-warning">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form action="{{ route(auth()->user()->role . '.bookings.destroy', $booking->id) }}" method="POST" class="d-inline"
-                                      onsubmit="return confirm('Yakin ingin menghapus data ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-sm btn-danger">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    @endforeach
 
-                    @if($bookings->isEmpty())
-                        <tr>
-                            <td colspan="11" class="text-center text-muted">Tidak ada data booking.</td>
-                        </tr>
-                    @endif
-                </tbody>
-            </table>
+        <!-- BODY -->
+        <div class="card-body">
+            @if(session('success'))
+                <div class="alert alert-success rounded-pill px-4 py-2 mb-4">
+                    <i class="fa-solid fa-check-circle me-2"></i> {{ session('success') }}
+                </div>
+            @endif
+
+            <h6 class="mb-3 text-secondary fw-bold">
+                <i class="fas fa-list me-2"></i> List Booking Kamar
+            </h6>
+
+            @if($bookings->isEmpty())
+                <div class="text-center text-muted py-5">
+                    <i class="fa-solid fa-bed-empty fa-2x mb-3"></i><br>
+                    Belum ada booking.
+                </div>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle text-center">
+                        <thead class="table-light">
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Tamu</th>
+                                <th>Kamar</th>
+                                <th>Durasi</th>
+                                <th>Harga Permalam</th>
+                                <th>Status</th>
+                                <th>Petugas</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($bookings as $booking)
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $booking->guest->name }}</td>
+                                    <td>
+                                        <span class="badge bg-soft-pink text-dark">
+                                            Kamar {{ $booking->room->number }} - {{ $booking->room->type }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {{ \Carbon\Carbon::parse($booking->check_in)->format('d/m/Y') }}<br>
+                                        <small class="text-muted">→</small><br>
+                                        {{ \Carbon\Carbon::parse($booking->check_out)->format('d/m/Y') }}
+                                        <div class="text-muted mt-1">
+                                            ({{ \Carbon\Carbon::parse($booking->check_out)->diffInDays($booking->check_in) }} malam)
+                                        </div>
+                                    </td>
+                                    <td>
+                                        Rp {{ number_format($booking->room->price ?? 0, 0, ',', '.') }}
+                                    </td>
+                                    <td>
+                                        @php
+                                            $badge = [
+                                                'booked' => 'warning',
+                                                'checked_in' => 'success',
+                                                'checked_out' => 'secondary',
+                                                'canceled' => 'danger',
+                                            ];
+                                        @endphp
+                                        <span class="badge bg-{{ $badge[$booking->status] ?? 'dark' }}">
+                                            {{ ucfirst(str_replace('_', ' ', $booking->status)) }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $booking->user->name }}</td>
+                                    <td class="text-center">
+                                        <a href="{{ route(auth()->user()->role . '.bookings.edit', $booking->id) }}"
+                                           class="btn btn-warning btn-sm me-1" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form action="{{ route(auth()->user()->role . '.bookings.destroy', $booking->id) }}"
+                                              method="POST"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Yakin ingin menghapus booking ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="btn btn-danger btn-sm" title="Hapus">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
         </div>
     </div>
 </div>
+
+<!-- Pastikan style pink juga tersedia -->
+<style>
+    .bg-pink-gradient {
+        background: linear-gradient(90deg, #f8bbd0, #f48fb1);
+    }
+    .text-pink {
+        color: #d63384 !important;
+    }
+    .bg-soft-pink {
+        background-color: #ffe2ec;
+    }
+    .btn-light.text-pink:hover {
+        background-color: #f1a5c3 !important;
+        color: white !important;
+    }
+    .badge {
+        font-size: 0.9rem;
+        padding: 0.45em 0.8em;
+        border-radius: 1rem;
+    }
+    .table th, .table td {
+        vertical-align: middle;
+    }
+</style>
 @endsection

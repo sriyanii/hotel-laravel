@@ -14,11 +14,36 @@ class Payment extends Model
         'amount',
         'paid_at',
         'method',
+        'total', // Tambah kolom total
     ];
 
     // Relasi ke tabel bookings
     public function booking()
     {
         return $this->belongsTo(Booking::class);
+    }
+
+    // Relasi ke tamu (guest)
+    public function guest()
+    {
+        return $this->belongsTo(Guest::class);
+    }
+
+    // Relasi ke kamar (room)
+    public function room()
+    {
+        return $this->belongsTo(Room::class);
+    }
+
+    // Relasi ke user (admin/resepsionis yang buat booking)
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    // Relasi ke pembayaran (payment)
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 }

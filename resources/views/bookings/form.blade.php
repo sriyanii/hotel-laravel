@@ -1,150 +1,123 @@
 @extends('layouts.adminlte')
-
-@section('title', 'Tambah Booking')
-@php use Illuminate\Support\Facades\Auth; @endphp
+@section('title', isset($booking) ? 'Edit Booking' : 'Tambah Booking')
 @section('content')
 <div class="container py-4">
-    <div class="card shadow rounded-4 border-0">
-        <div class="card-header bg-white border-bottom">
-            <h4 class="mb-0 fw-bold text-primary">
-                <i class="fas fa-bed me-2"></i>Tambah Booking
+    <div class="card shadow-sm border-0 rounded-lg overflow-hidden">
+        <!-- HEADER -->
+        <div class="card-header bg-pink-gradient text-white">
+            <h4 class="mb-0">
+                <i class="fas fa-bed me-2"></i>
+                {{ isset($booking) ? 'Edit Booking' : 'Tambah Booking Baru' }}
             </h4>
         </div>
+
+        <!-- BODY -->
         <div class="card-body">
-            <form action="{{ route(auth()->user()->role . '.bookings.store') }}" method="POST">
+            <form action="{{ isset($booking) ? route(auth()->user()->role . '.bookings.update', $booking->id) : route(auth()->user()->role . '.bookings.store') }}" method="POST">
                 @csrf
+                @if(isset($booking))
+                    @method('PUT')
+                @endif
 
-                {{-- TAMU --}}
-                <div class="mb-3">
-                    <label for="guest_id" class="form-label">Pilih Tamu</label>
-                    <select name="guest_id" id="guest_id" class="form-select">
-                        <option value="">-- Pilih Tamu Terdaftar --</option>
-                        @foreach($guests as $guest)
-                            <option value="{{ $guest->id }}">{{ $guest->name }}</option>
-                        @endforeach
-                    </select>
+                <!-- Guest Selection -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="guest_id" class="form-label fw-semibold text-dark">Pilih Tamu</label>
+                        <select name="guest_id" id="guest_id" class="form-select">
+                            <option value="">-- Pilih Tamu --</option>
+                            @foreach($guests as $guest)
+                                <option value="{{ $guest->id }}" {{ old('guest_id', $booking->guest_id ?? '') == $guest->id ? 'selected' : '' }}>
+                                    {{ $guest->name }} ({{ $guest->phone }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-dark">Atau Tambah Tamu Baru</label>
+                        <div class="input-group">
+                            <input type="text" name="new_guest_name" class="form-control" placeholder="Nama Tamu" value="{{ old('new_guest_name') }}">
+                            <input type="text" name="new_guest_phone" class="form-control" placeholder="No. Telepon" value="{{ old('new_guest_phone') }}">
+                            <input type="text" name="new_guest_identity" class="form-control" placeholder="No. Identitas" value="{{ old('new_guest_identity') }}">
+                        </div>
+                    </div>
                 </div>
 
-                {{-- TAMBAH TAMU BARU --}}
+                <!-- Room Selection -->
                 <div class="mb-3">
-                    <label for="new_guest_name" class="form-label">Atau Tambah Tamu Baru</label>
-                    <input type="text" name="new_guest_name" id="new_guest_name" class="form-control" placeholder="Contoh: Andi Wijaya">
-                    <div class="form-text">Isi jika tamu belum terdaftar.</div>
-                </div>
-
-
-                {{-- KAMAR --}}
-                <div class="mb-3">
-                    <label for="room_id" class="form-label">Pilih Kamar</label>
+                    <label for="room_id" class="form-label fw-semibold text-dark">Pilih Kamar</label>
                     <select name="room_id" id="room_id" class="form-select" required>
                         <option value="">-- Pilih Kamar --</option>
                         @foreach($rooms as $room)
-                            <option value="{{ $room->id }}" data-price="{{ $room->price }}">
-                                {{ $room->number }} - {{ $room->type }} (Rp{{ number_format($room->price, 0, ',', '.') }})
+                            <option value="{{ $room->id }}"
+                                data-price="{{ $room->price }}"
+                                {{ old('room_id', $booking->room_id ?? '') == $room->id ? 'selected' : '' }}>
+                                Kamar {{ $room->number }} - {{ $room->type }} (Rp {{ number_format($room->price) }})
                             </option>
                         @endforeach
                     </select>
                 </div>
 
-                {{-- CHECK-IN / OUT --}}
-                <div class="mb-3 row">
+                <!-- Date Selection -->
+                <div class="row mb-3">
                     <div class="col-md-6">
-                        <label for="check_in" class="form-label">Check-In</label>
-                        <input type="date" name="check_in" id="check_in" class="form-control" min="{{ date('Y-m-d') }}" required>
+                        <label for="check_in" class="form-label fw-semibold text-dark">Check In</label>
+                        <input type="date" name="check_in" id="check_in" class="form-control" 
+                               value="{{ old('check_in', isset($booking) ? $booking->check_in->format('Y-m-d') : '') }}" required />
                     </div>
                     <div class="col-md-6">
-                        <label for="check_out" class="form-label">Check-Out</label>
-                        <input type="date" name="check_out" id="check_out" class="form-control" min="{{ date('Y-m-d') }}" required>
+                        <label for="check_out" class="form-label fw-semibold text-dark">Check Out</label>
+                        <input type="date" name="check_out" id="check_out" class="form-control" 
+                               value="{{ old('check_out', isset($booking) ? $booking->check_out->format('Y-m-d') : '') }}" required />
                     </div>
                 </div>
 
-                {{-- TOTAL HARGA --}}
+                <!-- Status Selection -->
                 <div class="mb-3">
-                    <label for="total_price" class="form-label">Total Harga</label>
-                    <input type="text" name="total_price" id="total_price" class="form-control bg-light" readonly>
-                </div>
-
-                {{-- PENANGGUNG JAWAB --}}
-                <div class="mb-3">
-                    <label class="form-label">Penanggung Jawab</label>
-                    <input type="text" class="form-control bg-light" value="{{ Auth::user()->name }}" readonly>
-                    <input type="hidden" name="user_id" value="{{ Auth::id() }}">
-                </div>
-
-                {{-- STATUS --}}
-                <div class="mb-3">
-                    <label for="status" class="form-label">Status Booking</label>
+                    <label for="status" class="form-label fw-semibold text-dark">Status Booking</label>
                     <select name="status" id="status" class="form-select" required>
-                        <option value="Booked" selected>Booked</option>
-                        <option value="Check-In">Check-In</option>
-                        <option value="Cancelled">Cancelled</option>
+                        @foreach(['booked' => 'Booked', 'checked_in' => 'Check In', 'checked_out' => 'Check Out', 'canceled' => 'Dibatalkan'] as $value => $label)
+                            <option value="{{ $value }}" {{ old('status', $booking->status ?? 'booked') == $value ? 'selected' : '' }}>
+                                {{ $label }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
 
-                {{-- BUTTONS --}}
+                <!-- Action Buttons -->
                 <div class="d-flex justify-content-between mt-4">
-                    <a href="{{ route(auth()->user()->role . '.bookings.index') }}" class="btn btn-secondary">
+                    <a href="{{ route(auth()->user()->role . '.bookings.index') }}" class="btn btn-secondary px-3">
                         <i class="fas fa-arrow-left me-1"></i> Kembali
                     </a>
-                    <div>
-                        <button type="button" id="editBtn" class="btn btn-warning me-2">
-                            <i class="fas fa-edit me-1"></i> Ubah Data Booking
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-1"></i> Simpan Booking
-                        </button>
-                    </div>
+                    <button type="submit" class="btn btn-pink-gradient text-white px-4">
+                        <i class="fas fa-save me-1"></i> Simpan
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-{{-- SCRIPT --}}
-<script>
-    const roomSelect = document.getElementById('room_id');
-    const checkInInput = document.getElementById('check_in');
-    const checkOutInput = document.getElementById('check_out');
-    const totalPriceInput = document.getElementById('total_price');
-    const editBtn = document.getElementById('editBtn');
-    let isEditing = false;
-
-    function calculateTotalPrice() {
-        const roomOption = roomSelect.options[roomSelect.selectedIndex];
-        const price = parseFloat(roomOption.getAttribute('data-price') || 0);
-
-        const checkIn = new Date(checkInInput.value);
-        const checkOut = new Date(checkOutInput.value);
-
-        if (!isNaN(checkIn.getTime()) && !isNaN(checkOut.getTime()) && checkOut > checkIn) {
-            const nights = (checkOut - checkIn) / (1000 * 60 * 60 * 24);
-            const total = nights * price;
-            totalPriceInput.value = total.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' });
-        } else {
-            totalPriceInput.value = '';
-        }
+<style>
+    .bg-pink-gradient {
+        background: linear-gradient(90deg, #f8bbd0, #f48fb1);
     }
-
-    [roomSelect, checkInInput, checkOutInput].forEach(input => {
-        input.addEventListener('change', calculateTotalPrice);
-    });
-
-    editBtn.addEventListener('click', () => {
-        isEditing = !isEditing;
-
-        checkInInput.readOnly = !isEditing;
-        checkOutInput.readOnly = !isEditing;
-        roomSelect.disabled = !isEditing;
-
-        editBtn.textContent = isEditing ? 'Selesai Mengedit' : 'Ubah Data Booking';
-
-        if (!isEditing) {
-            calculateTotalPrice();
-        }
-    });
-
-    checkInInput.addEventListener('change', function () {
-        checkOutInput.min = checkInInput.value;
-    });
-</script>
+    .text-pink {
+        color: #d63384 !important;
+    }
+    .btn-pink-gradient {
+        background: linear-gradient(90deg, #ec407a, #d81b60);
+        border: none;
+        color: white;
+        font-weight: bold;
+    }
+    .btn-pink-gradient:hover {
+        background: linear-gradient(90deg, #d81b60, #c2185b);
+    }
+    .form-label {
+        font-weight: 500;
+    }
+    .card-body {
+        background-color: #fdf2f6;
+    }
+</style>
 @endsection

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Str;
 use App\Models\Booking;
 use App\Models\Room;
 use App\Models\Guest;
@@ -14,7 +13,9 @@ class BookingController extends Controller
 {
     public function index()
     {
-        $bookings = Booking::with('guest', 'room', 'user')->latest()->get();
+        $bookings = Booking::with(['guest', 'room', 'user'])
+                          ->orderBy('created_at', 'desc')
+                          ->get();
 
         $view = view()->exists(auth()->user()->role . '.bookings.index')
             ? auth()->user()->role . '.bookings.index'
@@ -25,8 +26,8 @@ class BookingController extends Controller
 
     public function create()
     {
-        $rooms = Room::where('status', 'tersedia')->get();
-        $guests = Guest::all();
+        $rooms = Room::orderBy('number')->get();
+        $guests = Guest::orderBy('name')->get();
 
         $view = view()->exists(auth()->user()->role . '.bookings.form')
             ? auth()->user()->role . '.bookings.form'
@@ -37,47 +38,59 @@ class BookingController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validatedData = $request->validate([
             'guest_id' => 'nullable|exists:guests,id',
             'new_guest_name' => 'nullable|string|max:255',
+            'new_guest_phone' => 'nullable|string|max:20',
+            'new_guest_identity' => 'nullable|string|max:20',
             'room_id' => 'required|exists:rooms,id',
-            'check_in' => 'required|date',
+            'check_in' => 'required|date|after_or_equal:today',
             'check_out' => 'required|date|after:check_in',
-            'status' => 'required|in:Booked,Check-In,Cancelled',
+            'status' => 'required|in:booked,checked_in,checked_out,canceled',
         ]);
 
-        $guestId = $request->guest_id;
-        if (!$guestId && $request->new_guest_name) {
-            $guest = Guest::create(['name' => $request->new_guest_name]);
+        $guestId = $validatedData['guest_id'];
+        if (!$guestId && $validatedData['new_guest_name']) {
+            $guest = Guest::create([
+                'name' => $validatedData['new_guest_name'],
+                'phone' => $validatedData['new_guest_phone'] ?? '-',
+                'identity_number' => $validatedData['new_guest_identity'] ?? '-',
+            ]);
             $guestId = $guest->id;
         }
 
-        $room = Room::findOrFail($request->room_id);
-        $checkIn = Carbon::parse($request->check_in);
-        $checkOut = Carbon::parse($request->check_out);
+        $room = Room::findOrFail($validatedData['room_id']);
+        $checkIn = Carbon::parse($validatedData['check_in']);
+        $checkOut = Carbon::parse($validatedData['check_out']);
         $duration = $checkOut->diffInDays($checkIn);
-        $totalPrice = $room->price * $duration;
 
-        Booking::create([
-    'user_id' => Auth::id(),
-    'guest_id' => $guestId,
-    'room_id' => $request->room_id,
-    'check_in' => $request->check_in,
-    'check_out' => $request->check_out,
-    'status' => strtolower($request->status), // ini yang penting
-    'total_price' => $totalPrice,
-]);
+        $booking = Booking::create([
+            'user_id' => Auth::id(),
+            'guest_id' => $guestId,
+            'room_id' => $room->id,
+            'check_in' => $validatedData['check_in'],
+            'check_out' => $validatedData['check_out'],
+            'status' => $validatedData['status'],
+            'total_price' => $room->price, // Store the room price per night
+        ]);
 
+        if ($validatedData['status'] === 'checked_in') {
+            $room->update(['status' => 'terisi']);
+        } elseif ($validatedData['status'] === 'booked') {
+            $room->update(['status' => 'dipesan']);
+        }
 
-        return redirect()->route(auth()->user()->role . '.bookings.index')
-                         ->with('success', 'Booking berhasil ditambahkan.');
+        return redirect()->route(auth()->user()->role . '.bookings.index')->with('success', 'Booking berhasil ditambahkan.');
     }
 
     public function edit($id)
     {
-        $booking = Booking::findOrFail($id);
-        $rooms = Room::where('status', 'tersedia')->orWhere('id', $booking->room_id)->get();
-        $guests = Guest::all();
+        $booking = Booking::with('guest', 'room')->findOrFail($id);
+        $booking->check_in = Carbon::parse($booking->check_in);
+        $booking->check_out = Carbon::parse($booking->check_out);
+
+        $rooms = Room::orderBy('number')->get();
+        $guests = Guest::orderBy('name')->get();
 
         $view = view()->exists(auth()->user()->role . '.bookings.form')
             ? auth()->user()->role . '.bookings.form'
@@ -88,48 +101,69 @@ class BookingController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validatedData = $request->validate([
             'guest_id' => 'nullable|exists:guests,id',
             'new_guest_name' => 'nullable|string|max:255',
+            'new_guest_phone' => 'nullable|string|max:20',
+            'new_guest_identity' => 'nullable|string|max:20',
             'room_id' => 'required|exists:rooms,id',
             'check_in' => 'required|date',
             'check_out' => 'required|date|after:check_in',
-            'status' => 'required|in:Booked,Check-In,Cancelled',
+            'status' => 'required|in:booked,checked_in,checked_out,canceled',
         ]);
 
         $booking = Booking::findOrFail($id);
+        $originalRoom = $booking->room;
+        $newRoom = Room::findOrFail($validatedData['room_id']);
+        $guestId = $validatedData['guest_id'];
 
-        $guestId = $request->guest_id;
-        if (!$guestId && $request->new_guest_name) {
-            $guest = Guest::create(['name' => $request->new_guest_name]);
+        if (!$guestId && $validatedData['new_guest_name']) {
+            $guest = Guest::create([
+                'name' => $validatedData['new_guest_name'],
+                'phone' => $validatedData['new_guest_phone'] ?? '-',
+                'identity_number' => $validatedData['new_guest_identity'] ?? '-',
+            ]);
             $guestId = $guest->id;
         }
 
-        $room = Room::findOrFail($request->room_id);
-        $checkIn = Carbon::parse($request->check_in);
-        $checkOut = Carbon::parse($request->check_out);
-        $duration = $checkOut->diffInDays($checkIn);
-        $totalPrice = $room->price * $duration;
+        $checkIn = Carbon::parse($validatedData['check_in']);
+        $checkOut = Carbon::parse($validatedData['check_out']);
 
         $booking->update([
             'guest_id' => $guestId,
-            'room_id' => $request->room_id,
-            'check_in' => $request->check_in,
-            'check_out' => $request->check_out,
-            'status' => $request->status,
-            'total_price' => $totalPrice,
+            'room_id' => $validatedData['room_id'],
+            'check_in' => $validatedData['check_in'],
+            'check_out' => $validatedData['check_out'],
+            'status' => $validatedData['status'],
+            'total_price' => $newRoom->price, // Update with new room price
         ]);
 
-        return redirect()->route(auth()->user()->role . '.bookings.index')
-                         ->with('success', 'Booking berhasil diperbarui.');
+        if ($originalRoom->id != $newRoom->id) {
+            $originalRoom->update(['status' => 'tersedia']);
+        }
+
+        if ($validatedData['status'] === 'checked_in') {
+            $newRoom->update(['status' => 'terisi']);
+        } elseif (in_array($validatedData['status'], ['canceled', 'checked_out'])) {
+            $newRoom->update(['status' => 'tersedia']);
+        } elseif ($validatedData['status'] === 'booked') {
+            $newRoom->update(['status' => 'dipesan']);
+        }
+
+        return redirect()->route(auth()->user()->role . '.bookings.index')->with('success', 'Booking berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
         $booking = Booking::findOrFail($id);
+        $room = $booking->room;
+
         $booking->delete();
 
-        return redirect()->route(auth()->user()->role . '.bookings.index')
-                         ->with('success', 'Booking berhasil dihapus.');
+        if ($room) {
+            $room->update(['status' => 'tersedia']);
+        }
+
+        return redirect()->route(auth()->user()->role . '.bookings.index')->with('success', 'Booking berhasil dihapus.');
     }
 }
