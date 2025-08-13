@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\UserActivity;
+use App\Models\ActivityLog;
 
 class UserActivityController extends Controller
 {

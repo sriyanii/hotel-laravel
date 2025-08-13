@@ -23,7 +23,7 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="guest_id" class="form-label fw-semibold text-dark">Pilih Tamu</label>
-                        <select name="guest_id" id="guest_id" class="form-select">
+                        <select name="guest_id" id="guest_id" class="form-select @error('guest_id') is-invalid @enderror">
                             <option value="">-- Pilih Tamu --</option>
                             @foreach($guests as $guest)
                                 <option value="{{ $guest->id }}" {{ old('guest_id', $booking->guest_id ?? '') == $guest->id ? 'selected' : '' }}>
@@ -31,56 +31,81 @@
                                 </option>
                             @endforeach
                         </select>
+                        @error('guest_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-semibold text-dark">Atau Tambah Tamu Baru</label>
                         <div class="input-group">
-                            <input type="text" name="new_guest_name" class="form-control" placeholder="Nama Tamu" value="{{ old('new_guest_name') }}">
-                            <input type="text" name="new_guest_phone" class="form-control" placeholder="No. Telepon" value="{{ old('new_guest_phone') }}">
-                            <input type="text" name="new_guest_identity" class="form-control" placeholder="No. Identitas" value="{{ old('new_guest_identity') }}">
+                            <input type="text" name="new_guest_name" class="form-control @error('new_guest_name') is-invalid @enderror" placeholder="Nama Tamu" value="{{ old('new_guest_name') }}">
+                            <input type="text" name="new_guest_phone" class="form-control @error('new_guest_phone') is-invalid @enderror" placeholder="No. Telepon" value="{{ old('new_guest_phone') }}">
+                            <input type="text" name="new_guest_identity" class="form-control @error('new_guest_identity') is-invalid @enderror" placeholder="No. Identitas" value="{{ old('new_guest_identity') }}">
                         </div>
+                        @error('new_guest_name', 'new_guest_phone', 'new_guest_identity')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
 
                 <!-- Room Selection -->
                 <div class="mb-3">
                     <label for="room_id" class="form-label fw-semibold text-dark">Pilih Kamar</label>
-                    <select name="room_id" id="room_id" class="form-select" required>
+                    <select name="room_id" id="room_id" class="form-select @error('room_id') is-invalid @enderror" required>
                         <option value="">-- Pilih Kamar --</option>
                         @foreach($rooms as $room)
                             <option value="{{ $room->id }}"
                                 data-price="{{ $room->price }}"
-                                {{ old('room_id', $booking->room_id ?? '') == $room->id ? 'selected' : '' }}>
+                                {{ old('room_id', $booking->room_id ?? '') == $room->id ? 'selected' : '' }}
+                                @if(isset($booking) && $booking->room_id == $room->id) 
+                                    style="font-weight: bold; background-color: #f0f8ff;"
+                                @endif>
                                 Kamar {{ $room->number }} - {{ $room->type }} (Rp {{ number_format($room->price) }})
+                                @if(isset($booking) && $booking->room_id == $room->id)
+                                    (Kamar saat ini)
+                                @endif
                             </option>
                         @endforeach
                     </select>
+                    @error('room_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    <div class="form-text">Hanya kamar yang tersedia yang ditampilkan</div>
                 </div>
 
                 <!-- Date Selection -->
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="check_in" class="form-label fw-semibold text-dark">Check In</label>
-                        <input type="date" name="check_in" id="check_in" class="form-control" 
+                        <input type="date" name="check_in" id="check_in" class="form-control @error('check_in') is-invalid @enderror" 
                                value="{{ old('check_in', isset($booking) ? $booking->check_in->format('Y-m-d') : '') }}" required />
+                        @error('check_in')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-md-6">
                         <label for="check_out" class="form-label fw-semibold text-dark">Check Out</label>
-                        <input type="date" name="check_out" id="check_out" class="form-control" 
+                        <input type="date" name="check_out" id="check_out" class="form-control @error('check_out') is-invalid @enderror" 
                                value="{{ old('check_out', isset($booking) ? $booking->check_out->format('Y-m-d') : '') }}" required />
+                        @error('check_out')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
 
                 <!-- Status Selection -->
                 <div class="mb-3">
                     <label for="status" class="form-label fw-semibold text-dark">Status Booking</label>
-                    <select name="status" id="status" class="form-select" required>
+                    <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
                         @foreach(['booked' => 'Booked', 'checked_in' => 'Check In', 'checked_out' => 'Check Out', 'canceled' => 'Dibatalkan'] as $value => $label)
                             <option value="{{ $value }}" {{ old('status', $booking->status ?? 'booked') == $value ? 'selected' : '' }}>
                                 {{ $label }}
                             </option>
                         @endforeach
                     </select>
+                    @error('status')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <!-- Action Buttons -->
@@ -120,4 +145,26 @@
         background-color: #fdf2f6;
     }
 </style>
+
+<script>
+    // Client-side validation for dates
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkIn = document.getElementById('check_in');
+        const checkOut = document.getElementById('check_out');
+        
+        if (checkIn && checkOut) {
+            // Set minimum date for check-in to today
+            const today = new Date().toISOString().split('T')[0];
+            checkIn.min = today;
+            
+            // Update check-out min date when check-in changes
+            checkIn.addEventListener('change', function() {
+                checkOut.min = this.value;
+                if (checkOut.value && checkOut.value < this.value) {
+                    checkOut.value = '';
+                }
+            });
+        }
+    });
+</script>
 @endsection

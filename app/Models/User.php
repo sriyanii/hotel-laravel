@@ -11,47 +11,43 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name', 
         'email', 
         'password', 
         'password_plain', 
-        'role'
+        'role' // Pastikan nilai di database konsisten
     ];
 
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
 
     /**
-     * Method untuk mengecek role user
+     * Method untuk mengecek role user (support multiple roles)
      */
-    public function hasRole($role)
+    public function hasRole($roles)
     {
-        return $this->role === $role;
+        if (is_array($roles)) {
+            return in_array($this->role, $roles);
+        }
+        
+        return $this->role === $roles;
     }
 
-    
+    public function isAdmin()
+    {
+        return $this->hasRole('admin');
+    }
+
+    public function isResepsionis()
+    {
+        return $this->hasRole('resepsionis'); // Konsisten dengan ejaan Indonesia
+    }
 }

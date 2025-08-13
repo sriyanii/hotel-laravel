@@ -16,7 +16,9 @@ class Payment extends Model
         'method',
         'total', // Tambah kolom total
     ];
-
+      protected $casts = [
+        'paid_at' => 'datetime',
+    ];
     // Relasi ke tabel bookings
     public function booking()
     {

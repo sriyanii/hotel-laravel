@@ -5,21 +5,33 @@ namespace App\Http\Controllers;
 use App\Models\Payment;
 use App\Models\Booking;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Carbon;
+use App\Models\ActivityLog;
 
 class PaymentController extends Controller
 {
     public function index()
     {
-        $payments = Payment::with(['booking.guest', 'booking.room'])->latest()->get();
-        return view('payments.index', compact('payments'));
+        $payments = Payment::with(['booking.room', 'booking.guest'])
+                         ->orderBy('paid_at', 'desc')
+                         ->paginate(10);
+
+        $view = view()->exists(auth()->user()->role . '.payments.index')
+            ? auth()->user()->role . '.payments.index'
+            : 'payments.index';
+
+        return view($view, compact('payments'));
     }
 
     public function create()
     {
         $role = auth()->user()->role;
 
+        // Hanya tampilkan booking yang belum memiliki pembayaran
         $bookings = Booking::with(['room', 'guest'])
             ->where('status', '!=', 'checked_out')
+            ->whereDoesntHave('payments')
             ->select('id', 'guest_id', 'room_id', 'check_in', 'check_out')
             ->selectRaw('DATEDIFF(check_out, check_in) as duration_nights')
             ->get();
@@ -35,37 +47,52 @@ class PaymentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'booking_id' => 'required|exists:bookings,id',
+            'booking_id' => [
+                'required',
+                'exists:bookings,id',
+                Rule::unique('payments', 'booking_id')
+            ],
             'amount' => 'required|numeric|min:0',
             'paid_at' => 'required|date',
             'method' => 'required|in:cash,transfer,qris',
-            'total' => 'required|numeric|min:0', // Tambah validasi untuk total
         ]);
 
-        // Hitung total berdasarkan data booking
-        $booking = Booking::find($request->booking_id);
-        $duration = \Carbon\Carbon::parse($booking->check_in)->diffInDays($booking->check_out);
-        $price = $booking->room->price;
-        $total = $duration * $price;
+        $booking = Booking::with('room')->findOrFail($request->booking_id);
+        
+        $duration = Carbon::parse($booking->check_in)->diffInDays($booking->check_out);
+        $calculatedTotal = $duration * $booking->room->price;
 
-        // Simpan data payment dengan total yang dihitung
+        // Validasi jumlah pembayaran
+        if ($request->method !== 'cash' && $request->amount != $calculatedTotal) {
+            return back()->withErrors([
+                'amount' => 'Untuk metode non-tunai, jumlah harus sama dengan total'
+            ])->withInput();
+        }
+
         Payment::create([
-            'booking_id' => $request->booking_id,
+            'booking_id' => $booking->id,
             'amount' => $request->amount,
             'paid_at' => $request->paid_at,
             'method' => $request->method,
-            'total' => $total, // Tambah kolom total di tabel payments
+            'total' => $calculatedTotal,
         ]);
 
-        $role = auth()->user()->role;
-        return redirect()->route($role . '.payments.index')->with('success', 'Transaksi berhasil ditambahkan.');
+        $booking->update(['status' => 'paid']);
+
+        return redirect()->route(auth()->user()->role . '.payments.index')
+               ->with('success', 'Transaksi berhasil ditambahkan.');
     }
 
     public function edit(Payment $payment)
     {
         $role = auth()->user()->role;
 
+        // Tampilkan semua booking yang belum dibayar + booking yang sedang diedit
         $bookings = Booking::with(['room', 'guest'])
+            ->where(function($query) use ($payment) {
+                $query->whereDoesntHave('payments')
+                      ->orWhere('id', $payment->booking_id);
+            })
             ->where('status', '!=', 'checked_out')
             ->select('id', 'guest_id', 'room_id', 'check_in', 'check_out')
             ->selectRaw('DATEDIFF(check_out, check_in) as duration_nights')
@@ -82,37 +109,44 @@ class PaymentController extends Controller
     public function update(Request $request, Payment $payment)
     {
         $request->validate([
-            'booking_id' => 'required|exists:bookings,id',
+            'booking_id' => [
+                'required',
+                'exists:bookings,id',
+                Rule::unique('payments', 'booking_id')->ignore($payment->id)
+            ],
             'amount' => 'required|numeric|min:0',
             'paid_at' => 'required|date',
             'method' => 'required|in:cash,transfer,qris',
-            'total' => 'required|numeric|min:0', // Tambah validasi untuk total
         ]);
 
-        // Hitung total berdasarkan data booking
-        $booking = Booking::find($request->booking_id);
-        $duration = \Carbon\Carbon::parse($booking->check_in)->diffInDays($booking->check_out);
-        $price = $booking->room->price;
-        $total = $duration * $price;
+        $booking = Booking::with('room')->findOrFail($request->booking_id);
+        $duration = Carbon::parse($booking->check_in)->diffInDays($booking->check_out);
+        $total = $duration * $booking->room->price;
 
-        // Update data payment dengan total yang dihitung
+        // Validasi jumlah pembayaran
+        if ($request->method !== 'cash' && $request->amount != $total) {
+            return back()->withErrors([
+                'amount' => 'Untuk metode non-tunai, jumlah harus sama dengan total'
+            ])->withInput();
+        }
+
         $payment->update([
-            'booking_id' => $request->booking_id,
+            'booking_id' => $booking->id,
             'amount' => $request->amount,
             'paid_at' => $request->paid_at,
             'method' => $request->method,
-            'total' => $total, // Tambah kolom total di tabel payments
+            'total' => $total,
         ]);
 
-        $role = auth()->user()->role;
-        return redirect()->route($role . '.payments.index')->with('success', 'Transaksi berhasil diperbarui.');
+        return redirect()->route(auth()->user()->role . '.payments.index')
+               ->with('success', 'Transaksi berhasil diperbarui.');
     }
 
     public function destroy(Payment $payment)
     {
         $payment->delete();
 
-        $role = auth()->user()->role;
-        return redirect()->route($role . '.payments.index')->with('success', 'Transaksi berhasil dihapus.');
+        return redirect()->route(auth()->user()->role . '.payments.index')
+               ->with('success', 'Transaksi berhasil dihapus.');
     }
 }

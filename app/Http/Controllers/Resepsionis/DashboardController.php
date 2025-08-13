@@ -6,6 +6,7 @@ use App\Models\Room;
 use App\Models\Guest;
 use App\Models\Booking;
 use Illuminate\Http\Request;
+use App\Models\ActivityLog;
 use App\Http\Controllers\Controller;
 
 class DashboardController extends Controller

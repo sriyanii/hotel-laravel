@@ -101,36 +101,55 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const ctx = document.getElementById('monthlyChart').getContext('2d');
-    const monthlyChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: {!! json_encode($months) !!},
-            datasets: [{
-                label: 'Pendapatan (Rp)',
-                data: {!! json_encode($totals) !!},
-                backgroundColor: '#f06292',
-                borderRadius: 8
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                }
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        const monthlyChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: {!! json_encode($months) !!},
+                datasets: [{
+                    label: 'Pendapatan (Rp)',
+                    data: {!! json_encode($totals) !!},
+                    backgroundColor: '#f06292',
+                    borderRadius: 8,
+                    borderColor: '#ec407a',
+                    borderWidth: 1
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return 'Rp' + value.toLocaleString('id-ID');
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Rp' + context.raw.toLocaleString('id-ID');
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rp' + value.toLocaleString('id-ID');
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
                         }
                     }
                 }
             }
-        }
+        });
     });
 </script>
 @endpush

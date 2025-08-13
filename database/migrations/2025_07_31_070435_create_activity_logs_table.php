@@ -11,6 +11,8 @@ return new class extends Migration {
             $table->id();
             $table->string('description');
             $table->string('user')->nullable();
+            $table->string('role')->nullable(); // Role user yang melakukan aksi
+            $table->string('target_role')->nullable(); // Role target aksi (jika ada)
             $table->timestamps();
         });
     }

@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class ResepsionisMiddleware
+class AdminResepsionisMiddleware
 {
     /**
      * Handle an incoming request.
@@ -22,9 +22,9 @@ class ResepsionisMiddleware
             return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu');
         }
 
-        // Pastikan user memiliki role resepsionis
-        if (auth()->user()->role !== 'resepsionis') {
-            abort(403, 'Akses ditolak. Hanya untuk resepsionis.');
+        // Periksa apakah user memiliki role admin atau resepsionis
+        if (!in_array(auth()->user()->role, ['admin', 'resepsionis'])) {
+            abort(403, 'Akses ditolak. Hanya untuk admin dan resepsionis.');
         }
 
         return $next($request);

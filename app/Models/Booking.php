@@ -45,7 +45,7 @@ class Booking extends Model
     // Relasi ke pembayaran (payment)
     public function payments()
     {
-        return $this->hasMany(Payment::class);
+        return $this->hasOne(Payment::class);
     }
 
     // Accessor untuk durasi menginap
