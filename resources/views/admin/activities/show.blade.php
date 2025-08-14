@@ -1,4 +1,4 @@
-@extends('layouts.adminlte')
+<!-- @extends('layouts.adminlte')
 
 @section('content')
 <div class="card">
@@ -51,4 +51,4 @@
         </div>
     </div>
 </div>
-@endsection
+@endsection -->

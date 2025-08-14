@@ -4,51 +4,69 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class ActivityLogController extends Controller
 {
     public function index(Request $request)
     {
-        // Validasi input
-        $validated = $request->validate([
-            'search'     => 'nullable|string',
-            'per_page'   => 'nullable|integer',
-            'date_range' => 'nullable|string'
+        // Validasi
+        $request->validate([
+            'search' => 'nullable|string',
+            'role' => 'nullable|in:admin,resepsionis',
+            'type' => 'nullable|in:login,logout,create,update,delete',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date'
         ]);
 
         $query = ActivityLog::with('user')->latest();
 
         // Filter pencarian
-        if (!empty($validated['search'])) {
-            $search = $validated['search'];
-            $query->where(function ($q) use ($search) {
-                $q->where('description', 'like', "%{$search}%")
-                  ->orWhereHas('user', function ($q2) use ($search) {
-                      $q2->where('name', 'like', "%{$search}%");
-                  });
+        if ($request->search) {
+            $query->where(function($q) use ($request) {
+                $q->where('description', 'like', "%{$request->search}%")
+                  ->orWhereHas('user', fn($q) => 
+                      $q->where('name', 'like', "%{$request->search}%")
+                  );
             });
         }
 
-        // Filter tanggal
-        if (!empty($validated['date_range'])) {
-            $dates = explode(' - ', $validated['date_range']);
-            if (count($dates) === 2) {
-                $startDate = date('Y-m-d', strtotime($dates[0]));
-                $endDate   = date('Y-m-d', strtotime($dates[1]));
-                $query->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
-            }
+        // Filter role
+        if ($request->role) {
+            $query->where('role', $request->role);
         }
 
-        // Pagination
-        $activities = $query->paginate($validated['per_page'] ?? 20);
+        // Filter tipe aktivitas
+        if ($request->type) {
+            $query->where('activity_type', $request->type);
+        }
 
-        return view('admin.activities.index', compact('activities'));
+        // Filter tanggal
+        if ($request->start_date) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+        if ($request->end_date) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+
+        $activities = $query->paginate(10);
+
+        return view('admin.activities.index', [
+            'activities' => $activities,
+            'roles' => ['admin' => 'Admin', 'resepsionis' => 'Resepsionis'],
+            'types' => [
+                'login' => 'Login',
+                'logout' => 'Logout',
+                'create' => 'Buat Data',
+                'update' => 'Update Data',
+                'delete' => 'Hapus Data'
+            ]
+        ]);
     }
 
     public function show(ActivityLog $activity)
-{
-    return view('admin.activities.show', compact('activity'));
-}
-
+    {
+        return view('admin.activities.show', compact('activity'));
+    }
 }

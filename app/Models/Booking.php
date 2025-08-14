@@ -26,15 +26,18 @@ class Booking extends Model
 
     // Relasi ke tamu (guest)
     public function guest()
-    {
-        return $this->belongsTo(Guest::class);
-    }
+{
+    return $this->belongsTo(Guest::class)->withDefault([
+        'name' => 'Guest Deleted'
+    ]);
+}
 
-    // Relasi ke kamar (room)
-    public function room()
-    {
-        return $this->belongsTo(Room::class);
-    }
+public function room()
+{
+    return $this->belongsTo(Room::class)->withDefault([
+        'number' => 'Room Deleted'
+    ]);
+}
 
     // Relasi ke user (admin/resepsionis yang buat booking)
     public function user()

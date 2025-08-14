@@ -23,6 +23,7 @@
     .quick-links a {
         border-color: #f48fb1;
         color: #880e4f;
+        flex: 1 1 calc(50% - 10px);
     }
 
     .quick-links a:hover {
@@ -46,6 +47,13 @@
         color: #6b0033;
     }
 
+    .badge-status {
+        background-color: #96515b !important;
+        color: #fff !important;
+        padding: 0.4em 0.75em;
+        font-size: 0.85rem;
+    }
+
     .breadcrumb-item a {
         color: #d63384;
     }
@@ -54,20 +62,34 @@
         background-color: #fffafa;
         border-radius: 8px;
         padding: 5px;
+        max-width: 100%;
+        height: auto !important;
+    }
+
+    /* Mobile optimization */
+    @media (max-width: 576px) {
+        .stat-card .card-body {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .quick-links a {
+            flex: 1 1 100%;
+        }
     }
 </style>
 
 <div class="content-header py-4 shadow-sm mb-4 rounded" style="background-color: #ffe5ec;">
     <div class="container-fluid">
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
             <div>
                 <h1 class="m-0 fw-bold text-dark"><i class="fas fa-hotel me-2"></i>Dashboard Admin Hotel Abadi</h1>
                 <small class="text-muted">Selamat datang kembali, {{ auth()->user()->name }}!</small>
             </div>
-            <ol class="breadcrumb">
+            <!-- <ol class="breadcrumb mt-2 mt-md-0">
                 <li class="breadcrumb-item"><a href="#">Beranda</a></li>
                 <li class="breadcrumb-item active">Dashboard</li>
-            </ol>
+            </ol> -->
         </div>
     </div>
 </div>
@@ -79,15 +101,15 @@
         <div class="row">
             @php
                 $stats = [
-                    ['label' => 'Total Kamar', 'value' => $totalRooms, 'icon' => 'bed'],
-                    ['label' => 'Tamu Terdaftar', 'value' => $totalGuests, 'icon' => 'users'],
-                    ['label' => 'Booking Hari Ini', 'value' => $bookingsToday, 'icon' => 'calendar-check'],
-                    ['label' => 'Pendapatan Bulan Ini', 'value' => 'Rp ' . number_format($revenueThisMonth, 0, ',', '.'), 'icon' => 'money-bill-wave'],
+                    ['label' => 'Total Kamar', 'value' => $stats['totalRooms'], 'icon' => 'bed'],
+                    ['label' => 'Tamu Terdaftar', 'value' => $stats['totalGuests'], 'icon' => 'users'],
+                    ['label' => 'Booking Hari Ini', 'value' => $stats['bookingsToday'], 'icon' => 'calendar-check'],
+                    ['label' => 'Pendapatan Bulan Ini', 'value' => 'Rp ' . number_format($stats['revenueThisMonth'], 0, ',', '.'), 'icon' => 'money-bill-wave'],
                 ];
             @endphp
 
             @foreach($stats as $stat)
-            <div class="col-md-3 col-sm-6 mb-4">
+            <div class="col-lg-3 col-md-6 col-12 mb-4">
                 <div class="card stat-card h-100 shadow-sm">
                     <div class="card-body d-flex justify-content-between align-items-center">
                         <div>
@@ -121,19 +143,19 @@
 
         {{-- Grafik + User --}}
         <div class="row mb-4">
-            <div class="col-lg-8">
-                <div class="card shadow-sm border-0">
+            <div class="col-lg-8 mb-4 mb-lg-0">
+                <div class="card shadow-sm border-0 h-100">
                     <div class="card-header bg-white fw-bold">
                         <i class="fas fa-chart-line me-1 text-pink"></i> Statistik Booking Bulanan
                     </div>
-                    <div class="card-body">
-                        <canvas id="bookingChart" height="140"></canvas>
+                    <div class="card-body" style="height: 300px;">
+                        <canvas id="bookingChart"></canvas>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-4">
-                <div class="card shadow-sm border-0">
+                <div class="card shadow-sm border-0 h-100">
                     <div class="card-header bg-white fw-bold">
                         <i class="fas fa-user-plus me-1 text-pink"></i> User Terbaru
                     </div>
@@ -167,7 +189,6 @@
                         <thead style="background-color: #fdeff2;">
                             <tr>
                                 <th>Nama Tamu</th>
-                                <th>Kamar</th>
                                 <th>Check-in</th>
                                 <th>Check-out</th>
                                 <th>Status</th>
@@ -176,13 +197,12 @@
                         <tbody>
                             @forelse($activeBookings as $booking)
                                 <tr>
-                                    <td>{{ $booking->guest->name }}</td>
-                                    <td>{{ $booking->room->room_number }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($booking->check_in)->format('d M Y') }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($booking->check_out)->format('d M Y') }}</td>
+                                    <td>{{ $booking->guest->name ?? 'N/A' }}</td>
+                                    <td>{{ $booking->check_in ? \Carbon\Carbon::parse($booking->check_in)->format('d M Y') : 'N/A' }}</td>
+                                    <td>{{ $booking->check_out ? \Carbon\Carbon::parse($booking->check_out)->format('d M Y') : 'N/A' }}</td>
                                     <td>
-                                        <span class="badge rounded-pill">
-                                            {{ ucfirst(str_replace('_', ' ', $booking->status)) }}
+                                        <span class="badge rounded-pill badge-status">
+                                            {{ ucfirst(str_replace('_', ' ', $booking->status ?? 'unknown')) }}
                                         </span>
                                     </td>
                                 </tr>
@@ -204,7 +224,7 @@
             </div>
             <div class="card-body p-3">
                 @forelse($recentLogs as $log)
-                    <div class="d-flex justify-content-between border-bottom py-2">
+                    <div class="d-flex justify-content-between border-bottom py-2 flex-wrap">
                         <span><i class="fas fa-info-circle me-2 text-muted"></i>{{ $log->description }}</span>
                         <small class="text-muted">{{ $log->created_at->diffForHumans() }}</small>
                     </div>
@@ -239,6 +259,7 @@
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: { display: false }
             },

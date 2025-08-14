@@ -79,6 +79,15 @@ class PaymentController extends Controller
 
         $booking->update(['status' => 'paid']);
 
+        // Log activity
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'activity_type' => 'create',
+            'description' => 'Mencatat pembayaran untuk booking #' . $validated['booking_id'],
+            'ip_address' => request()->ip(),
+            'role' => auth()->user()->role
+        ]);
+
         return redirect()->route(auth()->user()->role . '.payments.index')
                ->with('success', 'Transaksi berhasil ditambahkan.');
     }
@@ -138,12 +147,33 @@ class PaymentController extends Controller
             'total' => $total,
         ]);
 
+        // Log activity
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'activity_type' => 'update',
+            'description' => 'Memperbarui pembayaran #' . $payment->id,
+            'ip_address' => request()->ip(),
+            'role' => auth()->user()->role,
+            'old_values' => json_encode($oldData),
+            'new_values' => json_encode($validated)
+        ]);
+
         return redirect()->route(auth()->user()->role . '.payments.index')
                ->with('success', 'Transaksi berhasil diperbarui.');
     }
 
     public function destroy(Payment $payment)
     {
+
+        // Log activity sebelum dihapus
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'activity_type' => 'delete',
+            'description' => 'Menghapus pembayaran #' . $payment->id,
+            'ip_address' => request()->ip(),
+            'role' => auth()->user()->role,
+            'old_values' => json_encode($payment->toArray())
+        ]);
         $payment->delete();
 
         return redirect()->route(auth()->user()->role . '.payments.index')

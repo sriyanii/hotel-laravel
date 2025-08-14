@@ -13,48 +13,88 @@ use Carbon\Carbon;
 
 class LaporanKeuanganController extends Controller
 {
-    public function index(Request $request)
-    {
-        $query = Payment::with(['booking.guest', 'booking.room']);
+    // In your LaporanKeuanganController.php
 
-        $bulan = $request->input('bulan');
-        $tahun = $request->input('tahun', date('Y'));
-
-        if ($bulan) {
-            $query->whereMonth('paid_at', $bulan);
-        }
-
-        if ($tahun) {
-            $query->whereYear('paid_at', $tahun);
-        }
-
-        $payments = $query->latest()->get();
-        $totalPendapatan = $payments->sum('amount');
-
-        // Statistik bulanan
-        $statistik = Payment::selectRaw('MONTH(paid_at) as month, SUM(amount) as total')
-            ->whereYear('paid_at', $tahun)
-            ->groupBy(DB::raw('MONTH(paid_at)'))
-            ->orderBy('month')
-            ->get();
-
-        $months = [];
-        $totals = [];
-
-        foreach ($statistik as $item) {
-            $months[] = Carbon::create()->month($item->month)->locale('id')->monthName;
-            $totals[] = $item->total;
-        }
-
-        return view('admin.laporan_keuangan.index', compact(
-            'payments',
-            'totalPendapatan',
-            'months',
-            'totals',
-            'bulan',
-            'tahun'
-        ));
+public function index()
+{
+    $currentYear = date('Y');
+    
+    // Get all payments for the current year
+    $payments = Payment::whereYear('paid_at', $currentYear)
+        ->orderBy('created_at', 'desc')
+        ->get();
+    
+    // Calculate total revenue
+    $totalPendapatan = $payments->sum('amount');
+    
+    // Get monthly data for the chart
+    $monthlyData = Payment::selectRaw('MONTH(paid_at) as month, SUM(amount) as total')
+        ->whereYear('paid_at', $currentYear)
+        ->groupBy('month')
+        ->orderBy('month')
+        ->get();
+    
+    // Prepare months and totals for the chart
+    $months = [];
+    $totals = [];
+    $monthNames = [
+        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+    ];
+    
+    // Fill all months with data (including months with no payments)
+    for ($i = 1; $i <= 12; $i++) {
+        $months[] = $monthNames[$i];
+        $monthData = $monthlyData->firstWhere('month', $i);
+        $totals[] = $monthData ? $monthData->total : 0;
     }
+    
+    // Current month statistics
+    $currentMonth = date('m');
+    $currentMonthRevenue = Payment::whereYear('paid_at', $currentYear)
+        ->whereMonth('paid_at', $currentMonth)
+        ->sum('amount');
+    
+    $lastMonthRevenue = Payment::whereYear('paid_at', $currentYear)
+        ->whereMonth('paid_at', $currentMonth - 1)
+        ->sum('amount');
+    
+    $monthlyGrowthRate = $lastMonthRevenue != 0 
+        ? (($currentMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100 
+        : 0;
+    
+    // Get best month
+    $bestMonthData = Payment::selectRaw('MONTH(paid_at) as month, SUM(amount) as revenue')
+        ->whereYear('paid_at', $currentYear)
+        ->groupBy('month')
+        ->orderBy('revenue', 'desc')
+        ->first();
+    
+    $bestMonth = [
+        'month' => $bestMonthData ? $monthNames[$bestMonthData->month] : 'Belum ada data',
+        'revenue' => $bestMonthData ? $bestMonthData->revenue : 0
+    ];
+    
+    // Calculate average monthly revenue
+    $averageMonthlyRevenue = Payment::whereYear('paid_at', $currentYear)
+        ->avg('amount');
+    
+    // Monthly target (you can set this as needed)
+    $monthlyTarget = 15000000; // Example target: 15 million
+    
+    return view('admin.laporan_keuangan.index', compact(
+        'payments',
+        'totalPendapatan',
+        'currentMonthRevenue',
+        'monthlyGrowthRate',
+        'bestMonth',
+        'averageMonthlyRevenue',
+        'monthlyTarget',
+        'months',
+        'totals'
+    ));
+}
 
     public function cetak()
     {

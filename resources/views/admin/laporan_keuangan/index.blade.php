@@ -45,15 +45,81 @@
         </div>
     </div>
 
-    {{-- Grafik Pendapatan Bulanan --}}
-    <div class="card mb-4 shadow-soft rounded-4 border-0">
-        <div class="card-header bg-pink-soft border-0">
-            <h5 class="fw-semibold text-pink-soft mb-0"><i class="bi bi-bar-chart-line me-2"></i> Statistik Bulanan - {{ now()->year }}</h5>
-        </div>
-        <div class="card-body bg-white">
-            <canvas id="monthlyChart" height="100"></canvas>
+    {{-- Statistik Pendapatan Perbulan --}}
+<div class="row mb-4">
+    @php
+        $monthlyStats = [
+            [
+                'label' => 'Pendapatan Bulan Ini', 
+                'value' => isset($currentMonthRevenue) ? 'Rp' . number_format($currentMonthRevenue, 0, ',', '.') : 'Rp0', 
+                'icon' => 'calendar-day',
+                'bg' => 'linear-gradient(135deg, #f3e5f5, #e1bee7)',
+                'change' => $monthlyGrowthRate ?? 0
+            ],
+            [
+                'label' => 'Bulan Terbaik', 
+                'value' => isset($bestMonth) ? $bestMonth['month'] . ' (' . 'Rp' . number_format($bestMonth['revenue'], 0, ',', '.') . ')' : 'Belum ada data', 
+                'icon' => 'trophy',
+                'bg' => 'linear-gradient(135deg, #fff8e1, #ffecb3)'
+            ],
+            [
+                'label' => 'Rata-rata Perbulan', 
+                'value' => isset($averageMonthlyRevenue) ? 'Rp' . number_format($averageMonthlyRevenue, 0, ',', '.') : 'Rp0', 
+                'icon' => 'chart-line',
+                'bg' => 'linear-gradient(135deg, #e8f5e9, #c8e6c9)'
+            ],
+            [
+                'label' => 'Target Bulanan', 
+                'value' => 'Rp' . number_format($monthlyTarget ?? 0, 0, ',', '.'), 
+                'icon' => 'bullseye',
+                'bg' => 'linear-gradient(135deg, #e3f2fd, #bbdefb)',
+                'progress' => isset($currentMonthRevenue, $monthlyTarget) 
+                    ? min(100, ($currentMonthRevenue/$monthlyTarget)*100) 
+                    : 0
+            ],
+        ];
+    @endphp
+
+    @foreach($monthlyStats as $stat)
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card stat-card h-100 shadow-sm" style="background: {{ $stat['bg'] }};">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <h5 class="fw-bold mb-1">{{ $stat['value'] }}</h5>
+                        <p class="mb-1">{{ $stat['label'] }}</p>
+                    </div>
+                    <i class="fas fa-{{ $stat['icon'] }} fa-2x opacity-75"></i>
+                </div>
+                
+                @isset($stat['change'])
+                <div class="mt-2">
+                    <span class="badge {{ $stat['change'] >= 0 ? 'bg-success' : 'bg-danger' }} rounded-pill">
+                        <i class="fas fa-arrow-{{ $stat['change'] >= 0 ? 'up' : 'down' }} me-1"></i>
+                        {{ number_format(abs($stat['change']), 1) }}% {{ $stat['change'] >= 0 ? 'Naik' : 'Turun' }}
+                    </span>
+                    <small class="text-muted ms-2">vs bulan lalu</small>
+                </div>
+                @endisset
+                
+                @isset($stat['progress'])
+                <div class="mt-3">
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-primary" role="progressbar" 
+                             style="width: {{ $stat['progress'] }}%" 
+                             aria-valuenow="{{ $stat['progress'] }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                    <small class="text-muted">{{ number_format($stat['progress'], 1) }}% tercapai</small>
+                </div>
+                @endisset
+            </div>
         </div>
     </div>
+    @endforeach
+</div>
 
     {{-- Tabel Riwayat Pembayaran --}}
     <div class="card shadow-soft border-0 rounded-4">
@@ -106,10 +172,10 @@
         const monthlyChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: {!! json_encode($months) !!},
+                labels: {!! json_encode($months ?? []) !!},
                 datasets: [{
                     label: 'Pendapatan (Rp)',
-                    data: {!! json_encode($totals) !!},
+                    data: {!! json_encode($totals ?? []) !!},
                     backgroundColor: '#f06292',
                     borderRadius: 8,
                     borderColor: '#ec407a',
@@ -118,6 +184,7 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         display: false

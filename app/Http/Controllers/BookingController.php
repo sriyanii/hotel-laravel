@@ -74,6 +74,15 @@ class BookingController extends Controller
         }
         
         Booking::create($validated);
+
+        // Log activity
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'activity_type' => 'create',
+            'description' => 'Membuat booking baru untuk kamar: ' . $room->room_number,
+            'ip_address' => request()->ip(),
+            'role' => auth()->user()->role
+        ]);
         
         return redirect()->route(auth()->user()->role . '.bookings.index')
                ->with('success', 'Booking created successfully');
@@ -95,6 +104,17 @@ class BookingController extends Controller
         }
         
         $booking->update($validated);
+
+         // Log activity
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'activity_type' => 'update',
+            'description' => 'Memperbarui booking #' . $booking->id,
+            'ip_address' => request()->ip(),
+            'role' => auth()->user()->role,
+            'old_values' => json_encode($oldData),
+            'new_values' => json_encode($validated)
+        ]);
         
         return redirect()->route(auth()->user()->role . '.bookings.index')
                ->with('success', 'Booking updated successfully');
@@ -126,3 +146,13 @@ class BookingController extends Controller
         ];
     }
 }
+
+// Log activity sebelum dihapus destroy
+        // ActivityLog::create([
+        //     'user_id' => auth()->id(),
+        //     'activity_type' => 'delete',
+        //     'description' => 'Membatalkan booking #' . $booking->id,
+        //     'ip_address' => request()->ip(),
+        //     'role' => auth()->user()->role,
+        //     'old_values' => json_encode($booking->toArray())
+        // ]);

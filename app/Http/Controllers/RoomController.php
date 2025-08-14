@@ -57,6 +57,15 @@ class RoomController extends Controller
 
         Room::create($validated);
 
+        // Log activity
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'activity_type' => 'create',
+            'description' => 'Menambahkan kamar baru: ' . $room->room_number,
+            'ip_address' => request()->ip(),
+            'role' => auth()->user()->role
+        ]);
+
         return redirect()->route('admin.rooms.index')
             ->with('success', 'Ruangan berhasil ditambahkan!');
     }
@@ -100,6 +109,17 @@ class RoomController extends Controller
 
         $room->update($validated);
 
+        // Log activity
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'activity_type' => 'update',
+            'description' => 'Memperbarui data kamar: ' . $room->room_number,
+            'ip_address' => request()->ip(),
+            'role' => auth()->user()->role,
+            'old_values' => json_encode($oldData),
+            'new_values' => json_encode($validated)
+        ]);
+
         return redirect()->route('admin.rooms.index')
             ->with('success', 'Ruangan berhasil diperbarui!');
     }
@@ -109,6 +129,16 @@ class RoomController extends Controller
         if ($room->photo) {
             Storage::disk('public')->delete($room->photo);
         }
+
+        // Log activity sebelum dihapus
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'activity_type' => 'delete',
+            'description' => 'Menghapus kamar: ' . $room->room_number,
+            'ip_address' => request()->ip(),
+            'role' => auth()->user()->role,
+            'old_values' => json_encode($room->toArray())
+        ]);
 
         $room->delete();
 

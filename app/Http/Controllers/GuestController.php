@@ -28,6 +28,15 @@ class GuestController extends Controller
         ]);
 
         Guest::create($request->all());
+
+        // Log activity
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'activity_type' => 'create',
+            'description' => 'Menambahkan tamu baru: ' . $guest->name,
+            'ip_address' => request()->ip(),
+            'role' => auth()->user()->role
+        ]);
         return redirect()->route(auth()->user()->role . '.guests.index')->with('success', 'Tamu berhasil ditambahkan.');
     }
 
@@ -45,11 +54,32 @@ class GuestController extends Controller
         ]);
 
         $guest->update($request->all());
+
+        // Log activity
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'activity_type' => 'update',
+            'description' => 'Memperbarui data tamu: ' . $guest->name,
+            'ip_address' => request()->ip(),
+            'role' => auth()->user()->role,
+            'old_values' => json_encode($oldData),
+            'new_values' => json_encode($validated)
+        ]);
         return redirect()->route(auth()->user()->role . '.guests.index')->with('success', 'Data tamu berhasil diupdate.');
     }
 
     public function destroy(Guest $guest)
     {
+
+        // Log activity sebelum dihapus
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'activity_type' => 'delete',
+            'description' => 'Menghapus tamu: ' . $guest->name,
+            'ip_address' => request()->ip(),
+            'role' => auth()->user()->role,
+            'old_values' => json_encode($guest->toArray())
+        ]);
         $guest->delete();
         return redirect()->route(auth()->user()->role . '.guests.index')->with('success', 'Tamu berhasil dihapus.');
     }

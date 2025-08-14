@@ -10,52 +10,146 @@ use App\Models\Payment;
 use App\Models\User;
 use App\Models\ActivityLog;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // Statistik umum
-        $totalRooms = Room::count();
-        $totalGuests = Guest::count();
-        $bookingsToday = Booking::whereDate('created_at', Carbon::today())->count();
+        // === Statistik umum ===
+        $totalRooms   = Room::count();
+        $totalGuests  = Guest::count();
+        $bookingsToday = Booking::whereDate('created_at', today())->count();
         $revenueThisMonth = Payment::whereMonth('created_at', now()->month)->sum('amount');
 
-        // User terbaru (ambil 5)
+        $stats = [
+            'totalRooms'      => $totalRooms,
+            'totalGuests'     => $totalGuests,
+            'bookingsToday'   => $bookingsToday,
+            'revenueThisMonth'=> $revenueThisMonth
+        ];
+
+        // === Status kamar ===
+        $roomStatus = [
+            'available'   => Room::where('status', 'available')->count(),
+            'occupied'    => Room::where('status', 'occupied')->count(),
+            'maintenance' => Room::where('status', 'maintenance')->count(),
+        ];
+
+        // === Statistik pendapatan (perbandingan) ===
+        $todayRevenue      = Payment::whereDate('created_at', today())->sum('amount');
+        $yesterdayRevenue  = Payment::whereDate('created_at', today()->subDay())->sum('amount');
+
+        $weekRevenue       = Payment::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->sum('amount');
+        $lastWeekRevenue   = Payment::whereBetween('created_at', [now()->subWeek()->startOfWeek(), now()->subWeek()->endOfWeek()])->sum('amount');
+
+        $monthRevenue      = Payment::whereMonth('created_at', now()->month)->sum('amount');
+        $lastMonthRevenue  = Payment::whereMonth('created_at', now()->subMonth()->month)->sum('amount');
+
+        $revenueStats = [
+            'today'         => $todayRevenue,
+            'today_percent' => $yesterdayRevenue > 0 ? round((($todayRevenue - $yesterdayRevenue) / $yesterdayRevenue) * 100, 2) : 100,
+
+            'week'          => $weekRevenue,
+            'week_percent'  => $lastWeekRevenue > 0 ? round((($weekRevenue - $lastWeekRevenue) / $lastWeekRevenue) * 100, 2) : 100,
+
+            'month'         => $monthRevenue,
+            'month_percent' => $lastMonthRevenue > 0 ? round((($monthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100, 2) : 100,
+        ];
+
+        // === User terbaru ===
         $recentUsers = User::latest()->take(5)->get();
 
-        // Booking aktif (belum check-out)
-        $activeBookings = Booking::where('status', '!=', 'checked_out')->take(10)->get();
+        // === Booking aktif ===
+        $activeBookings = Booking::with(['guest', 'room'])
+            ->where('status', 'booked', 'checked_out')
+            ->orderBy('check_in')
+            ->take(10)
+            ->get();
 
-        // Grafik booking bulanan (Januari - Desember)
+        // === Booking terbaru ===
+        $recentBookings = Booking::with(['guest', 'room'])
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get();
+
+        // === Data check-in & check-out hari ini ===
+        $checkInsToday = Booking::with(['guest', 'room'])
+            ->whereDate('check_in', Carbon::today())
+            ->where('status', '!=', 'checked_out')
+            ->orderBy('check_in', 'asc')
+            ->get();
+
+        $checkOutsToday = Booking::with(['guest', 'room'])
+            ->whereDate('check_out', Carbon::today())
+            ->where('status', '!=', 'checked_out')
+            ->orderBy('check_out', 'asc')
+            ->get();
+
+        // === Data grafik bulanan booking ===
+        $monthlyData = Booking::select(
+                DB::raw('MONTH(created_at) as month'),
+                DB::raw('COUNT(*) as count')
+            )
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('count', 'month')
+            ->toArray();
+
         $monthlyLabels = [];
-        $monthlyCounts = [];
-        for ($i = 1; $i <= 12; $i++) {
-            $monthName = Carbon::create()->month($i)->translatedFormat('F');
-            $monthlyLabels[] = $monthName;
-            $monthlyCounts[] = Booking::whereMonth('created_at', $i)->count();
+        $monthlyCounts = array_fill(0, 12, 0);
+        foreach ($monthlyData as $month => $count) {
+            $monthlyLabels[] = Carbon::create()->month($month)->translatedFormat('F');
+            $monthlyCounts[$month - 1] = $count;
         }
 
-        // Log aktivitas: catat bahwa admin membuka dashboard
-        ActivityLog::create([
-            'description' => 'Admin mengakses dashboard',
-            'user' => auth()->user()->name ?? 'Guest',
-        ]);
+        // === Simpan log akses dashboard ===
+        try {
+            ActivityLog::create([
+                'user_id'       => auth()->id(),
+                'activity_type' => 'access',
+                'description'   => 'Admin mengakses dashboard',
+                'ip_address'    => request()->ip(),
+                'user_agent'    => request()->userAgent(),
+                'role'          => auth()->user()->role,
+                'created_at'    => now(),
+                'updated_at'    => now()
+            ]);
+        } catch (\Exception $e) {
+            logger()->error('Gagal mencatat aktivitas dashboard: ' . $e->getMessage());
+        }
 
-        // Log aktivitas (ambil 10 terbaru)
-        $recentLogs = ActivityLog::latest()->take(10)->get();
+        // === Log aktivitas terbaru ===
+        $recentLogs = ActivityLog::with('user:id,name')
+            ->latest()
+            ->take(10)
+            ->get();
 
-        // Kirim data ke view
+        // === Activities dengan pagination ===
+        $activities = ActivityLog::with('user:id,name,role,email')
+            ->latest()
+            ->paginate(15);
+
+        // === Kirim data ke view ===
         return view('admin.dashboard', [
-            'totalRooms' => $totalRooms,
-            'totalGuests' => $totalGuests,
-            'bookingsToday' => $bookingsToday,
-            'revenueThisMonth' => $revenueThisMonth,
-            'recentUsers' => $recentUsers,
-            'activeBookings' => $activeBookings,
-            'monthlyBookingLabels' => $monthlyLabels,
-            'monthlyBookingCounts' => $monthlyCounts,
-            'recentLogs' => $recentLogs,
+            'stats'                 => $stats,
+            'roomStatus'            => $roomStatus,
+            'revenueStats'          => $revenueStats,
+            'recentUsers'           => $recentUsers,
+            'activeBookings'        => $activeBookings,
+            'recentBookings'        => $recentBookings,
+            'checkInsToday'         => $checkInsToday,
+            'checkOutsToday'        => $checkOutsToday,
+            'monthlyBookingLabels'  => $monthlyLabels,
+            'monthlyBookingCounts'  => $monthlyCounts,
+            'recentLogs'            => $recentLogs,
+            'activities'            => $activities,
+
+            // kompatibilitas untuk Blade lama
+            'totalRooms'            => $totalRooms,
+            'availableRooms'        => $roomStatus['available'],
+            'totalGuests'           => $totalGuests,
+            'bookingsToday'         => $bookingsToday,
         ]);
     }
 }

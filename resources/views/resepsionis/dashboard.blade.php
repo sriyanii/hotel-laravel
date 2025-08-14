@@ -42,10 +42,10 @@
                 <h1 class="m-0 fw-bold text-dark"><i class="fas fa-hotel me-2"></i>Dashboard Resepsionis</h1>
                 <small class="text-muted">Selamat datang kembali, {{ auth()->user()->name }}!</small>
             </div>
-            <ol class="breadcrumb">
+            <!-- <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="#">Beranda</a></li>
                 <li class="breadcrumb-item active">Dashboard</li>
-            </ol>
+            </ol> -->
         </div>
     </div>
 </div>
