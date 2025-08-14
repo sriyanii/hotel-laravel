@@ -5,63 +5,164 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use App\Models\ActivityLog;
 
 class AdminProfileController extends Controller
 {
     // Tampilkan profil admin
     public function show()
     {
-        return view('admin.profile.show'); // pastikan file view admin/profile/show.blade.php ada
+        try {
+            $user = auth()->user();
+            $this->logActivity('Melihat profil admin', $user);
+            return view('admin.profile.show', compact('user'));
+        } catch (\Exception $e) {
+            Log::error('Error viewing admin profile: ' . $e->getMessage());
+            return back()->with('error', 'Gagal menampilkan profil admin.');
+        }
     }
 
     // Form edit profil
     public function edit()
     {
-        return view('admin.profile.edit'); // pastikan file view admin/profile/edit.blade.php ada
+        try {
+            $user = auth()->user();
+            $this->logActivity('Mengakses form edit profil admin', $user);
+            return view('admin.profile.edit', compact('user'));
+        } catch (\Exception $e) {
+            Log::error('Error accessing edit profile form: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengakses form edit profil.');
+        }
     }
 
     // Update profil
     public function update(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . auth()->id(),
-            'password' => 'nullable|string|min:8|confirmed',
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email,' . auth()->id(),
+                'password' => 'nullable|string|min:8|confirmed',
+            ]);
 
-        $data = $request->only('name', 'email');
+            $user = auth()->user();
+            $oldData = $user->toArray();
+            $data = $request->only('name', 'email');
 
-        if ($request->filled('password')) {
-            $data['password'] = Hash::make($request->password);
+            if ($request->filled('password')) {
+                $data['password'] = Hash::make($request->password);
+            }
+
+            $user->update($data);
+            
+            // Log changes
+            $changes = [];
+            foreach ($data as $key => $value) {
+                if ($oldData[$key] != $value) {
+                    $changes[$key] = [
+                        'old' => $key === 'password' ? '********' : $oldData[$key],
+                        'new' => $key === 'password' ? '********' : $value
+                    ];
+                }
+            }
+
+            if (!empty($changes)) {
+                $this->logActivity(
+                    'Memperbarui profil admin: ' . json_encode($changes),
+                    $user,
+                    'update'
+                );
+            }
+
+            return redirect()->route('admin.profile.show')
+                ->with('success', 'Profil admin berhasil diperbarui.');
+
+        } catch (\Exception $e) {
+            Log::error('Error updating admin profile: ' . $e->getMessage());
+            return back()->with('error', 'Gagal memperbarui profil admin.');
         }
-
-        auth()->user()->update($data);
-
-        return redirect()->route('admin.profile.show')->with('success', 'Profil admin berhasil diperbarui.');
     }
 
     // Form ganti password
     public function showChangePasswordForm()
     {
-        return view('admin.profile.change_password'); // pastikan view admin/profile/change_password.blade.php ada
+        try {
+            $this->logActivity('Mengakses form ganti password', auth()->user());
+            return view('admin.profile.change_password');
+        } catch (\Exception $e) {
+            Log::error('Error accessing change password form: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengakses form ganti password.');
+        }
     }
 
     // Proses ganti password
     public function changePassword(Request $request)
     {
-        $request->validate([
-            'current_password' => 'required',
-            'new_password' => 'required|min:8|confirmed',
-        ]);
+        try {
+            $request->validate([
+                'current_password' => 'required',
+                'new_password' => 'required|min:8|confirmed',
+            ]);
 
-        if (!Hash::check($request->current_password, auth()->user()->password)) {
-            return back()->withErrors(['current_password' => 'Password saat ini salah.']);
+            $user = auth()->user();
+
+            if (!Hash::check($request->current_password, $user->password)) {
+                $this->logActivity(
+                    'Gagal ganti password: password saat ini salah',
+                    $user,
+                    'error'
+                );
+                return back()->withErrors(['current_password' => 'Password saat ini salah.']);
+            }
+
+            $user->update([
+                'password' => Hash::make($request->new_password)
+            ]);
+
+            $this->logActivity(
+                'Berhasil mengubah password',
+                $user,
+                'security'
+            );
+
+            return redirect()->route('admin.profile.show')
+                ->with('success', 'Password berhasil diubah.');
+
+        } catch (\Exception $e) {
+            Log::error('Error changing password: ' . $e->getMessage());
+            $this->logActivity(
+                'Gagal mengubah password: ' . $e->getMessage(),
+                auth()->user(),
+                'error'
+            );
+            return back()->with('error', 'Gagal mengubah password.');
         }
+    }
 
-        auth()->user()->update([
-            'password' => Hash::make($request->new_password)
-        ]);
-
-        return redirect()->route('admin.profile.show')->with('success', 'Password berhasil diubah.');
+    /**
+     * Helper method to log activities
+     *
+     * @param string $description
+     * @param \App\Models\User $user
+     * @param string $type
+     */
+    private function logActivity(string $description, $user, string $type = 'info')
+    {
+        try {
+            ActivityLog::create([
+                'user_id' => $user->id,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'description' => $description,
+                'type' => $type,
+                'method' => request()->method(),
+                'url' => request()->fullUrl(),
+                'referer' => request()->header('referer'),
+                'data' => $type === 'error' ? null : json_encode(request()->except(['password', '_token']))
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to log activity: ' . $e->getMessage());
+        }
     }
 }

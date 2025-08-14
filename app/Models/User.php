@@ -16,7 +16,10 @@ class User extends Authenticatable
         'email', 
         'password', 
         'password_plain', 
-        'role' // Pastikan nilai di database konsisten
+        'role',
+        'phone',
+        'address',
+        'photo'
     ];
 
     protected $hidden = [
@@ -29,9 +32,6 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    /**
-     * Method untuk mengecek role user (support multiple roles)
-     */
     public function hasRole($roles)
     {
         if (is_array($roles)) {
@@ -48,6 +48,6 @@ class User extends Authenticatable
 
     public function isResepsionis()
     {
-        return $this->hasRole('resepsionis'); // Konsisten dengan ejaan Indonesia
+        return $this->hasRole('resepsionis');
     }
 }

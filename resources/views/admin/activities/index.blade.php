@@ -2,52 +2,85 @@
 
 @section('content')
 <style>
-    /* Pink Soft Modern Theme */
-    .bg-pink-soft {
-        background-color: #fce4ec !important;
+    :root {
+        --gold-primary: #C9A227;
+        --gold-light: #FFD700;
+        --cream-bg: #FAF6F0;
+        --dark-brown: #4E342E;
+        --dark-secondary: #3E2723;
     }
-    .text-pink-soft {
-        color: #d81b60 !important;
+
+    body {
+        background-color: var(--cream-bg);
     }
-    .badge-pink-pill {
-        background-color: #f8bbd0;
-        color: #4a148c;
+
+    /* Modern Gold Theme */
+    .bg-primary-soft {
+        background-color: rgba(201, 162, 39, 0.1) !important;
+    }
+
+    .text-primary {
+        color: var(--dark-brown) !important;
+    }
+
+    .text-primary-soft {
+        color: var(--gold-primary) !important;
+    }
+
+    .badge-gold-pill {
+        background-color: var(--gold-primary);
+        color: var(--dark-brown);
         border-radius: 50rem;
         padding: 0.35em 0.8em;
         font-weight: 600;
         font-size: 0.75rem;
     }
-    .badge-pink-pill-outline {
+
+    .badge-gold-pill-outline {
         background-color: transparent;
-        border: 1px solid #f48fb1;
-        color: #d81b60;
+        border: 1px solid var(--gold-primary);
+        color: var(--dark-brown);
         border-radius: 50rem;
         padding: 0.35em 0.8em;
         font-weight: 600;
         font-size: 0.75rem;
     }
+
     .card-modern {
         border: none;
         border-radius: 1rem;
-        box-shadow: 0 4px 15px rgba(236, 64, 122, 0.12);
+        box-shadow: 0 4px 15px rgba(201, 162, 39, 0.12);
     }
+
     .table-modern thead {
-        background-color: #f8bbd0;
-        color: #4a148c;
+        background-color: rgba(201, 162, 39, 0.2);
+        color: var(--dark-brown);
     }
+
     .table-modern tbody tr:hover {
-        background-color: #fff0f5;
+        background-color: rgba(255, 215, 0, 0.05);
     }
+
     .form-control:focus {
-        border-color: #ec407a;
-        box-shadow: 0 0 0 0.2rem rgba(236, 64, 122, 0.25);
+        border-color: var(--gold-primary);
+        box-shadow: 0 0 0 0.2rem rgba(201, 162, 39, 0.25);
+    }
+
+    .btn-filter {
+        background-color: var(--gold-primary);
+        color: var(--dark-brown);
+        border: none;
+    }
+
+    .btn-filter:hover {
+        background-color: var(--gold-light);
     }
 </style>
 
 <!-- FILTERS -->
 <div class="card card-modern mb-4">
-    <div class="card-header bg-pink-soft">
-        <h5 class="mb-0 text-pink-soft font-weight-bold">
+    <div class="card-header" style="background: rgba(201, 162, 39, 0.15);">
+        <h5 class="mb-0 text-primary font-weight-bold">
             <i class="fas fa-filter mr-2"></i> Filter Aktivitas
         </h5>
     </div>
@@ -80,7 +113,7 @@
                 <input type="date" name="end_date" class="form-control" value="{{ request('end_date') }}">
             </div>
             <div class="col-md-1">
-                <button type="submit" class="btn badge-pink-pill w-100">
+                <button type="submit" class="btn btn-filter w-100">
                     <i class="fas fa-search"></i>
                 </button>
             </div>
@@ -90,8 +123,8 @@
 
 <!-- TABLE -->
 <div class="card card-modern">
-    <div class="card-header bg-pink-soft">
-        <h5 class="mb-0 text-pink-soft font-weight-bold">
+    <div class="card-header" style="background: rgba(201, 162, 39, 0.15);">
+        <h5 class="mb-0 text-primary font-weight-bold">
             <i class="fas fa-history mr-2"></i> Daftar Aktivitas Sistem
         </h5>
     </div>
@@ -126,10 +159,10 @@
                             </div>
                         </td>
                         <td>
-                            <span class="badge-pink-pill">{{ ucfirst($activity->role) }}</span>
+                            <span class="badge-gold-pill">{{ ucfirst($activity->role) }}</span>
                         </td>
                         <td>
-                            <span class="badge-pink-pill-outline">{{ ucfirst($activity->activity_type) }}</span>
+                            <span class="badge-gold-pill-outline">{{ ucfirst($activity->activity_type) }}</span>
                         </td>
                         <td style="max-width: 300px; white-space: normal;">
                             {{ $activity->description }}

@@ -5,30 +5,30 @@
     $prefix = auth()->user()->role === 'admin' ? 'admin' : 'resepsionis';
 @endphp
 
-<div class="container py-4">
-    <div class="card shadow-sm border-0 rounded-lg overflow-hidden">
+<div class="container py-4" style="background-color: #FAF6F0;">
+    <div class="card shadow-sm border-0 rounded-lg overflow-hidden" style="border-top: 4px solid #C9A227;">
 
         {{-- HEADER --}}
-        <div class="card-header bg-pink-gradient text-white d-flex justify-content-between align-items-center">
+        <div class="card-header bg-gradient-gold text-white d-flex justify-content-between align-items-center">
             <h4 class="mb-0">
                 <i class="fa-solid fa-users me-2"></i> Data Tamu
             </h4>
-            <a href="{{ route($prefix . '.guests.create') }}" class="btn btn-light text-pink fw-semibold">
+            <a href="{{ route($prefix . '.guests.create') }}" class="btn btn-light text-gold fw-semibold">
                 <i class="fas fa-plus me-1"></i> Tambah Tamu
             </a>
         </div>
 
         {{-- BODY --}}
-        <div class="card-body">
+        <div class="card-body" style="background-color: #fff;">
             {{-- Notifikasi --}}
             @if (session('success'))
-                <div class="alert alert-success rounded-pill px-4 py-2 mb-4">
+                <div class="alert alert-success rounded-pill px-4 py-2 mb-4" style="border-left: 4px solid #4E342E;">
                     <i class="fa-solid fa-check-circle me-2"></i> {{ session('success') }}
                 </div>
             @endif
 
             {{-- Judul --}}
-            <h6 class="mb-3 text-secondary fw-bold">
+            <h6 class="mb-3 fw-bold" style="color: #4E342E;">
                 <i class="fa-solid fa-address-book me-2"></i>List Tamu Terdaftar
             </h6>
 
@@ -41,12 +41,12 @@
             @else
                 <div class="table-responsive">
                     <table class="table table-hover align-middle text-center">
-                        <thead class="table-light">
+                        <thead class="table-light" style="background-color: #f5f5f5;">
                             <tr>
-                                <th>Nama</th>
-                                <th>Telepon</th>
-                                <th>No Identitas</th>
-                                <th class="text-center">Aksi</th>
+                                <th style="color: #4E342E;">Nama</th>
+                                <th style="color: #4E342E;">Telepon</th>
+                                <th style="color: #4E342E;">No Identitas</th>
+                                <th class="text-center" style="color: #4E342E;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -55,7 +55,7 @@
                                     <td>{{ $guest->name }}</td>
                                     <td>{{ $guest->phone }}</td>
                                     <td>
-                                        <span class="badge bg-soft-pink text-dark">
+                                        <span class="badge bg-soft-gold">
                                             {{ $guest->identity_number }}
                                         </span>
                                     </td>
@@ -88,20 +88,21 @@
 
 {{-- Custom Styles --}}
 <style>
-    .bg-pink-gradient {
-        background: linear-gradient(90deg, #f8bbd0, #f48fb1);
+    .bg-gradient-gold {
+        background: linear-gradient(90deg, #C9A227, #FFD700);
     }
 
-    .text-pink {
-        color: #d63384 !important;
+    .text-gold {
+        color: #C9A227 !important;
     }
 
-    .bg-soft-pink {
-        background-color: #ffe2ec;
+    .bg-soft-gold {
+        background-color: #FFF8E1;
+        color: #4E342E;
     }
 
-    .btn-light.text-pink:hover {
-        background-color: #f1a5c3 !important;
+    .btn-light.text-gold:hover {
+        background-color: #C9A227 !important;
         color: white !important;
     }
 
@@ -113,6 +114,18 @@
         font-size: 0.9rem;
         padding: 0.45em 0.8em;
         border-radius: 1rem;
+    }
+
+    .card {
+        box-shadow: 0 4px 12px rgba(78, 52, 46, 0.1);
+    }
+
+    .table-light {
+        background-color: #f9f9f9;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(201, 162, 39, 0.05);
     }
 </style>
 @endsection

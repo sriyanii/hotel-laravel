@@ -7,20 +7,20 @@
     <div class="card shadow rounded-4 border-0">
 
         {{-- HEADER --}}
-        <div class="card-header bg-pink-soft text-dark d-flex justify-content-between align-items-center rounded-top-4">
+        <div class="card-header bg-gold text-dark d-flex justify-content-between align-items-center rounded-top-4">
             <h4 class="mb-0 fw-bold">
                 <i class="fas fa-credit-card me-2"></i> Daftar Pembayaran
             </h4>
-            <a href="{{ route('admin.payments.create') }}" class="btn btn-outline-pink-soft">
-                <i class="fas fa-plus"></i> Tambah Pembayaran
+            <a href="{{ route('admin.payments.create') }}" class="btn btn-outline-dark rounded-pill px-3">
+                <i class="fas fa-plus me-1"></i> Tambah Pembayaran
             </a>
         </div>
 
         {{-- TABLE --}}
-        <div class="card-body">
+        <div class="card-body bg-cream">
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
-                    <thead class="table-light">
+                    <thead class="table-dark-brown">
                         <tr>
                             <th>#</th>
                             <th>Kamar (Harga/Malam)</th>
@@ -57,7 +57,7 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="badge bg-pink-soft text-dark">
+                                    <span class="badge bg-light-gold text-dark">
                                         {{ ucfirst($payment->method) }}
                                     </span>
                                 </td>
@@ -67,7 +67,7 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <button class="btn btn-sm btn-outline-info me-1 view-btn" 
+                                    <button class="btn btn-sm btn-outline-brown me-1 view-btn" 
                                             data-bs-toggle="modal" 
                                             data-bs-target="#paymentModal" 
                                             data-payment='@json($payment)'>
@@ -107,17 +107,17 @@
 <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content rounded-4 border-0 shadow">
-            <div class="modal-header bg-pink-soft text-dark rounded-top-4">
+            <div class="modal-header bg-gold text-dark rounded-top-4">
                 <h5 class="modal-title fw-bold" id="paymentModalLabel">
                     <i class="fas fa-receipt me-2"></i> Detail Pembayaran
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body bg-cream">
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <h6 class="fw-bold text-pink">Informasi Booking</h6>
+                            <h6 class="fw-bold text-gold">Informasi Booking</h6>
                             <table class="table table-sm table-borderless">
                                 <tr>
                                     <th width="40%">ID Booking</th>
@@ -144,7 +144,7 @@
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <h6 class="fw-bold text-pink">Informasi Tamu</h6>
+                            <h6 class="fw-bold text-gold">Informasi Tamu</h6>
                             <table class="table table-sm table-borderless">
                                 <tr>
                                     <th width="40%">Nama Tamu</th>
@@ -164,7 +164,7 @@
                 </div>
                 
                 <div class="border-top pt-3">
-                    <h6 class="fw-bold text-pink">Detail Pembayaran</h6>
+                    <h6 class="fw-bold text-gold">Detail Pembayaran</h6>
                     <table class="table table-sm table-borderless">
                         <tr>
                             <th width="40%">Jumlah Bayar</th>
@@ -193,32 +193,82 @@
                     </table>
                 </div>
             </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+            <div class="modal-footer border-0 bg-cream">
+                <button type="button" class="btn btn-outline-dark-brown" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
 </div>
 
-{{-- CSS Tema Pink Soft --}}
+{{-- CSS Tema Gold dan Brown --}}
 <style>
-    .bg-pink-soft {
-        background-color: #ffe4ec !important;
+    /* Warna Utama */
+    .bg-gold {
+        background-color: #C9A227 !important;
     }
-    .btn-outline-pink-soft {
-        color: #d63384;
-        border: 1px solid #d63384;
+    .bg-cream {
+        background-color: #FAF6F0 !important;
+    }
+    .text-dark-brown {
+        color: #4E342E !important;
+    }
+    .bg-dark-brown {
+        background-color: #4E342E !important;
+    }
+    .table-dark-brown {
+        background-color: #3E2723;
+        color: white;
+    }
+    
+    /* Warna Sekunder */
+    .bg-light-gold {
+        background-color: rgba(201, 162, 39, 0.2) !important;
+    }
+    .text-gold {
+        color: #C9A227 !important;
+    }
+    
+    /* Tombol */
+    .btn-outline-gold {
+        color: #C9A227;
+        border: 1px solid #C9A227;
         background-color: transparent;
     }
-    .btn-outline-pink-soft:hover {
-        background-color: #d63384;
-        color: #fff;
+    .btn-outline-gold:hover {
+        background-color: #C9A227;
+        color: white;
     }
-    .badge.bg-pink-soft {
-        background-color: #f8d7e0;
+    .btn-outline-brown {
+        color: #4E342E;
+        border: 1px solid #4E342E;
+        background-color: transparent;
     }
-    .text-pink {
-        color: #d63384;
+    .btn-outline-brown:hover {
+        background-color: #4E342E;
+        color: white;
+    }
+    .btn-outline-dark-brown {
+        color: #3E2723;
+        border: 1px solid #3E2723;
+        background-color: transparent;
+    }
+    .btn-outline-dark-brown:hover {
+        background-color: #3E2723;
+        color: white;
+    }
+    
+    /* Badge */
+    .badge.bg-light-gold {
+        background-color: rgba(201, 162, 39, 0.2);
+    }
+    
+    /* Pagination */
+    .page-item.active .page-link {
+        background-color: #C9A227;
+        border-color: #C9A227;
+    }
+    .page-link {
+        color: #4E342E;
     }
 </style>
 

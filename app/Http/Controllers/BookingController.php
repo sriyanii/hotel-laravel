@@ -9,115 +9,189 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Models\ActivityLog;
+use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
 {
     public function index()
     {
-        $bookings = Booking::with(['guest', 'room', 'user'])
-                          ->orderBy('created_at', 'desc')
-                          ->get();
+        try {
+            $bookings = Booking::with(['guest', 'room', 'user'])
+                            ->orderBy('created_at', 'desc')
+                            ->get();
 
-        $view = view()->exists(auth()->user()->role . '.bookings.index')
-            ? auth()->user()->role . '.bookings.index'
-            : 'bookings.index';
+            $view = view()->exists(auth()->user()->role . '.bookings.index')
+                ? auth()->user()->role . '.bookings.index'
+                : 'bookings.index';
 
-        return view($view, compact('bookings'));
+            return view($view, compact('bookings'));
+        } catch (\Exception $e) {
+            Log::error('Error accessing bookings index: ' . $e->getMessage());
+            return back()->with('error', 'Gagal memuat daftar booking.');
+        }
+
+        $rooms = Room::whereDoesntHave('bookings', function($query) {
+        $query->whereIn('status', ['booked', 'checked_in']);
+    })->get();
+
+    // Get only guests without active bookings
+    $guests = Guest::whereDoesntHave('bookings', function($query) {
+        $query->whereIn('status', ['booked', 'checked_in']);
+    })->get();
+
+    return view('bookings.form', [
+        'rooms' => $rooms,
+        'guests' => $guests,
+    ]);
     }
     
     public function create()
     {
-        $bookedRoomIds = Booking::whereNotIn('status', ['checked_out', 'canceled'])
-                        ->pluck('room_id');
-        
-        $rooms = Room::whereNotIn('id', $bookedRoomIds)->get();
-        $guests = Guest::all();
-        
-        return view('bookings.form', [
-            'booking' => null,
-            'rooms' => $rooms,
-            'guests' => $guests
-        ]);
+        try {
+            $bookedRoomIds = Booking::whereNotIn('status', ['checked_out', 'canceled'])
+                            ->pluck('room_id');
+            
+            $rooms = Room::whereNotIn('id', $bookedRoomIds)->get();
+            $guests = Guest::all();
+            
+            return view('bookings.form', [
+                'booking' => null,
+                'rooms' => $rooms,
+                'guests' => $guests
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error accessing booking create form: ' . $e->getMessage());
+            return back()->with('error', 'Gagal memuat form booking.');
+        }
     }
 
     public function edit($id)
     {
-        $booking = Booking::findOrFail($id);
-        
-        $bookedRoomIds = Booking::whereNotIn('status', ['checked_out', 'canceled'])
-                        ->where('id', '!=', $id)
-                        ->pluck('room_id');
-        
-        $rooms = Room::whereNotIn('id', $bookedRoomIds)
-                ->orWhere('id', $booking->room_id)
-                ->get();
-        
-        $guests = Guest::all();
-        
-        return view('bookings.form', compact('booking', 'rooms', 'guests'));
+        try {
+            $booking = Booking::findOrFail($id);
+            
+            $bookedRoomIds = Booking::whereNotIn('status', ['checked_out', 'canceled'])
+                            ->where('id', '!=', $id)
+                            ->pluck('room_id');
+            
+            $rooms = Room::whereNotIn('id', $bookedRoomIds)
+                    ->orWhere('id', $booking->room_id)
+                    ->get();
+            
+            $guests = Guest::all();
+            
+            return view('bookings.form', compact('booking', 'rooms', 'guests'));
+        } catch (\Exception $e) {
+            Log::error('Error accessing booking edit form: ' . $e->getMessage());
+            return back()->with('error', 'Gagal memuat form edit booking.');
+        }
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate($this->validationRules());
-        
-        // Add the current user ID to the booking
-        $validated['user_id'] = auth()->id();
-        
-        if ($request->filled('new_guest_name')) {
-            $guest = Guest::create([
-                'name' => $request->new_guest_name,
-                'phone' => $request->new_guest_phone,
-                'identity_number' => $request->new_guest_identity
-            ]);
-            $validated['guest_id'] = $guest->id;
-        }
-        
-        Booking::create($validated);
+        try {
+            $validated = $request->validate($this->validationRules());
+            
+            $validated['user_id'] = auth()->id();
+            
+            if ($request->filled('new_guest_name')) {
+                $guest = Guest::create([
+                    'name' => $request->new_guest_name,
+                    'phone' => $request->new_guest_phone,
+                    'identity_number' => $request->new_guest_identity
+                ]);
+                $validated['guest_id'] = $guest->id;
+            }
+            
+            $booking = Booking::create($validated);
+            $room = Room::find($validated['room_id']);
 
-        // Log activity
-        ActivityLog::create([
-            'user_id' => auth()->id(),
-            'activity_type' => 'create',
-            'description' => 'Membuat booking baru untuk kamar: ' . $room->room_number,
-            'ip_address' => request()->ip(),
-            'role' => auth()->user()->role
-        ]);
-        
-        return redirect()->route(auth()->user()->role . '.bookings.index')
-               ->with('success', 'Booking created successfully');
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'activity_type' => 'create',
+                'description' => 'Membuat booking baru untuk kamar ' . $room->room_number,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'method' => request()->method(),
+                'url' => request()->fullUrl(),
+                'role' => auth()->user()->role,
+                'data' => json_encode($validated)
+            ]);
+            
+            return redirect()->route(auth()->user()->role . '.bookings.index')
+                   ->with('success', 'Booking berhasil dibuat');
+        } catch (\Exception $e) {
+            Log::error('Error creating booking: ' . $e->getMessage());
+            return back()->with('error', 'Gagal membuat booking.');
+        }
     }
 
     public function update(Request $request, $id)
     {
-        $booking = Booking::findOrFail($id);
-        
-        $validated = $request->validate($this->validationRules());
-        
-        if ($request->filled('new_guest_name')) {
-            $guest = Guest::create([
-                'name' => $request->new_guest_name,
-                'phone' => $request->new_guest_phone,
-                'identity_number' => $request->new_guest_identity
-            ]);
-            $validated['guest_id'] = $guest->id;
-        }
-        
-        $booking->update($validated);
+        try {
+            $booking = Booking::findOrFail($id);
+            $oldData = $booking->toArray();
+            
+            $validated = $request->validate($this->validationRules());
+            
+            if ($request->filled('new_guest_name')) {
+                $guest = Guest::create([
+                    'name' => $request->new_guest_name,
+                    'phone' => $request->new_guest_phone,
+                    'identity_number' => $request->new_guest_identity
+                ]);
+                $validated['guest_id'] = $guest->id;
+            }
+            
+            $booking->update($validated);
 
-         // Log activity
-        ActivityLog::create([
-            'user_id' => auth()->id(),
-            'activity_type' => 'update',
-            'description' => 'Memperbarui booking #' . $booking->id,
-            'ip_address' => request()->ip(),
-            'role' => auth()->user()->role,
-            'old_values' => json_encode($oldData),
-            'new_values' => json_encode($validated)
-        ]);
-        
-        return redirect()->route(auth()->user()->role . '.bookings.index')
-               ->with('success', 'Booking updated successfully');
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'activity_type' => 'update',
+                'description' => 'Memperbarui booking #' . $booking->id,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'method' => request()->method(),
+                'url' => request()->fullUrl(),
+                'role' => auth()->user()->role,
+                'old_values' => json_encode($oldData),
+                'new_values' => json_encode($validated)
+            ]);
+            
+            return redirect()->route(auth()->user()->role . '.bookings.index')
+                   ->with('success', 'Booking berhasil diperbarui');
+        } catch (\Exception $e) {
+            Log::error('Error updating booking: ' . $e->getMessage());
+            return back()->with('error', 'Gagal memperbarui booking.');
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $booking = Booking::findOrFail($id);
+            $bookingData = $booking->toArray();
+            
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'activity_type' => 'delete',
+                'description' => 'Membatalkan booking #' . $booking->id,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'method' => request()->method(),
+                'url' => request()->fullUrl(),
+                'role' => auth()->user()->role,
+                'old_values' => json_encode($bookingData)
+            ]);
+            
+            $booking->delete();
+            
+            return redirect()->route(auth()->user()->role . '.bookings.index')
+                   ->with('success', 'Booking berhasil dibatalkan');
+        } catch (\Exception $e) {
+            Log::error('Error deleting booking: ' . $e->getMessage());
+            return back()->with('error', 'Gagal membatalkan booking.');
+        }
     }
 
     protected function validationRules()
@@ -136,7 +210,7 @@ class BookingController extends Controller
                                 ->exists();
                     
                     if ($isBooked) {
-                        $fail('The selected room is already booked.');
+                        $fail('Kamar sudah dipesan.');
                     }
                 },
             ],
@@ -146,13 +220,3 @@ class BookingController extends Controller
         ];
     }
 }
-
-// Log activity sebelum dihapus destroy
-        // ActivityLog::create([
-        //     'user_id' => auth()->id(),
-        //     'activity_type' => 'delete',
-        //     'description' => 'Membatalkan booking #' . $booking->id,
-        //     'ip_address' => request()->ip(),
-        //     'role' => auth()->user()->role,
-        //     'old_values' => json_encode($booking->toArray())
-        // ]);

@@ -128,32 +128,55 @@
 </div>
 
 {{-- STYLE --}}
+{{-- STYLE --}}
 <style>
-    .bg-pink-soft {
-        background: linear-gradient(90deg, #fce4ec, #f8bbd0);
+    /* Header Card */
+    .bg-gold-soft {
+        background: linear-gradient(90deg, #FAF6F0, #C9A227); /* Cream → Gold */
     }
-    .btn-pink-soft {
-        background-color: #f8bbd0;
-        color: #6a1b4d;
+
+    /* Tombol aktif filter */
+    .btn-gold-soft {
+        background-color: #C9A227; /* Gold modern */
+        color: #4E342E; /* Cokelat tua */
         border: 1px solid transparent;
     }
-    .btn-pink-soft:hover {
-        background-color: #f48fb1;
-        color: white;
+    .btn-gold-soft:hover {
+        background-color: #FFD700; /* Gold terang */
+        color: #3E2723; /* Dark brown */
     }
-    .btn-outline-pink-soft {
-        border: 1px solid #f48fb1;
-        color: #c2185b;
+
+    /* Tombol outline filter */
+    .btn-outline-gold-soft {
+        border: 1px solid #C9A227;
+        color: #4E342E;
         background-color: white;
     }
-    .btn-outline-pink-soft:hover {
-        background-color: #f8bbd0;
-        color: #6a1b4d;
+    .btn-outline-gold-soft:hover {
+        background-color: #FFD700; /* Gold terang */
+        color: #3E2723;
     }
+
+    /* Background halaman */
     .content-wrapper {
-        background-color: #f4f6f9;
+        background-color: #FAF6F0; /* Cream hangat */
+    }
+
+    /* Badge status kamar */
+    .badge.bg-success {
+        background-color: #4CAF50 !important; /* Tetap hijau untuk 'tersedia' */
+    }
+    .badge.bg-danger {
+        background-color: #B71C1C !important; /* Merah tua untuk 'terisi' */
+    }
+    .badge.bg-warning {
+        background-color: #FFA000 !important; /* Kuning orange untuk 'maintenance' */
+    }
+    .badge.bg-secondary {
+        background-color: #795548 !important; /* Cokelat untuk status lain */
     }
 </style>
+
 @endsection
 
 @section('css')

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Carbon;
 use App\Models\ActivityLog;
+use Illuminate\Support\Facades\DB;
 
 class PaymentController extends Controller
 {
@@ -46,7 +47,7 @@ class PaymentController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validatedData = $request->validate([
             'booking_id' => [
                 'required',
                 'exists:bookings,id',
@@ -57,36 +58,38 @@ class PaymentController extends Controller
             'method' => 'required|in:cash,transfer,qris',
         ]);
 
-        $booking = Booking::with('room')->findOrFail($request->booking_id);
+        $booking = Booking::with('room')->findOrFail($validatedData['booking_id']);
         
         $duration = Carbon::parse($booking->check_in)->diffInDays($booking->check_out);
         $calculatedTotal = $duration * $booking->room->price;
 
         // Validasi jumlah pembayaran
-        if ($request->method !== 'cash' && $request->amount != $calculatedTotal) {
+        if ($validatedData['method'] !== 'cash' && $validatedData['amount'] != $calculatedTotal) {
             return back()->withErrors([
                 'amount' => 'Untuk metode non-tunai, jumlah harus sama dengan total'
             ])->withInput();
         }
 
-        Payment::create([
-            'booking_id' => $booking->id,
-            'amount' => $request->amount,
-            'paid_at' => $request->paid_at,
-            'method' => $request->method,
-            'total' => $calculatedTotal,
-        ]);
+        DB::transaction(function () use ($validatedData, $booking, $calculatedTotal) {
+            $payment = Payment::create([
+                'booking_id' => $booking->id,
+                'amount' => $validatedData['amount'],
+                'paid_at' => $validatedData['paid_at'],
+                'method' => $validatedData['method'],
+                'total' => $calculatedTotal,
+            ]);
 
-        $booking->update(['status' => 'paid']);
+            $booking->update(['status' => 'paid']);
 
-        // Log activity
-        ActivityLog::create([
-            'user_id' => auth()->id(),
-            'activity_type' => 'create',
-            'description' => 'Mencatat pembayaran untuk booking #' . $validated['booking_id'],
-            'ip_address' => request()->ip(),
-            'role' => auth()->user()->role
-        ]);
+            // Log activity
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'activity_type' => 'create',
+                'description' => 'Mencatat pembayaran untuk booking #' . $booking->id,
+                'ip_address' => request()->ip(),
+                'role' => auth()->user()->role
+            ]);
+        });
 
         return redirect()->route(auth()->user()->role . '.payments.index')
                ->with('success', 'Transaksi berhasil ditambahkan.');
@@ -117,7 +120,7 @@ class PaymentController extends Controller
 
     public function update(Request $request, Payment $payment)
     {
-        $request->validate([
+        $validatedData = $request->validate([
             'booking_id' => [
                 'required',
                 'exists:bookings,id',
@@ -128,35 +131,39 @@ class PaymentController extends Controller
             'method' => 'required|in:cash,transfer,qris',
         ]);
 
-        $booking = Booking::with('room')->findOrFail($request->booking_id);
+        $booking = Booking::with('room')->findOrFail($validatedData['booking_id']);
         $duration = Carbon::parse($booking->check_in)->diffInDays($booking->check_out);
         $total = $duration * $booking->room->price;
 
         // Validasi jumlah pembayaran
-        if ($request->method !== 'cash' && $request->amount != $total) {
+        if ($validatedData['method'] !== 'cash' && $validatedData['amount'] != $total) {
             return back()->withErrors([
                 'amount' => 'Untuk metode non-tunai, jumlah harus sama dengan total'
             ])->withInput();
         }
 
-        $payment->update([
-            'booking_id' => $booking->id,
-            'amount' => $request->amount,
-            'paid_at' => $request->paid_at,
-            'method' => $request->method,
-            'total' => $total,
-        ]);
+        $oldData = $payment->toArray();
 
-        // Log activity
-        ActivityLog::create([
-            'user_id' => auth()->id(),
-            'activity_type' => 'update',
-            'description' => 'Memperbarui pembayaran #' . $payment->id,
-            'ip_address' => request()->ip(),
-            'role' => auth()->user()->role,
-            'old_values' => json_encode($oldData),
-            'new_values' => json_encode($validated)
-        ]);
+        DB::transaction(function () use ($validatedData, $payment, $booking, $total, $oldData) {
+            $payment->update([
+                'booking_id' => $booking->id,
+                'amount' => $validatedData['amount'],
+                'paid_at' => $validatedData['paid_at'],
+                'method' => $validatedData['method'],
+                'total' => $total,
+            ]);
+
+            // Log activity
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'activity_type' => 'update',
+                'description' => 'Memperbarui pembayaran #' . $payment->id,
+                'ip_address' => request()->ip(),
+                'role' => auth()->user()->role,
+                'old_values' => json_encode($oldData),
+                'new_values' => json_encode($validatedData)
+            ]);
+        });
 
         return redirect()->route(auth()->user()->role . '.payments.index')
                ->with('success', 'Transaksi berhasil diperbarui.');
@@ -164,17 +171,21 @@ class PaymentController extends Controller
 
     public function destroy(Payment $payment)
     {
+        $oldData = $payment->toArray();
 
-        // Log activity sebelum dihapus
-        ActivityLog::create([
-            'user_id' => auth()->id(),
-            'activity_type' => 'delete',
-            'description' => 'Menghapus pembayaran #' . $payment->id,
-            'ip_address' => request()->ip(),
-            'role' => auth()->user()->role,
-            'old_values' => json_encode($payment->toArray())
-        ]);
-        $payment->delete();
+        DB::transaction(function () use ($payment, $oldData) {
+            // Log activity sebelum dihapus
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'activity_type' => 'delete',
+                'description' => 'Menghapus pembayaran #' . $payment->id,
+                'ip_address' => request()->ip(),
+                'role' => auth()->user()->role,
+                'old_values' => json_encode($oldData)
+            ]);
+            
+            $payment->delete();
+        });
 
         return redirect()->route(auth()->user()->role . '.payments.index')
                ->with('success', 'Transaksi berhasil dihapus.');

@@ -62,7 +62,7 @@ Route::prefix('resepsionis')->name('resepsionis.')->middleware(['auth', 'check.r
         Route::get('/edit', [ResepsionisProfileController::class, 'edit'])->name('edit');
         Route::put('/update', [ResepsionisProfileController::class, 'update'])->name('update');
         Route::get('/change-password', [ResepsionisProfileController::class, 'showChangePasswordForm'])->name('change-password.show');
-        Route::post('/change-password', [ResepsionisProfileController::class, 'changePassword'])->name('change-password');
+        Route::match(['put', 'post'], '/change-password', [ResepsionisProfileController::class, 'changePassword'])->name('change-password');
     });
 });
 

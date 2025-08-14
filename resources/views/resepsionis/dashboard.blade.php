@@ -5,47 +5,60 @@
 @section('content')
 <style>
     body {
-        background-color: #fff5f7;
+        background-color: #FAF6F0; /* Cream hangat */
     }
 
     .stat-card {
-        background: linear-gradient(135deg, #fce4ec, #f8bbd0);
-        color: #6b0033;
+        background: linear-gradient(135deg, #FAF6F0, #C9A227); /* Cream ke gold */
+        color: #4E342E; /* Cokelat tua */
         border: none;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-
     .stat-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
     }
 
     .card-header.bg-white {
-        background-color: #fff0f5 !important;
-        color: #880e4f;
+        background-color: #FAF6F0 !important;
+        color: #4E342E;
     }
 
     .badge {
-        background-color: #f8bbd0 !important;
-        color: #6b0033;
+        background-color: #C9A227 !important;
+        color: #4E342E;
+    }
+
+    .badge-status {
+        background-color: #3E2723 !important;
+        color: #fff !important;
+        padding: 0.4em 0.75em;
+        font-size: 0.85rem;
     }
 
     .breadcrumb-item a {
-        color: #d63384;
+        color: #C9A227;
+    }
+
+    /* Mobile */
+    @media (max-width: 576px) {
+        .stat-card .card-body {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
     }
 </style>
 
-<div class="content-header py-4 shadow-sm mb-4 rounded" style="background-color: #ffe5ec;">
+<div class="content-header py-4 shadow-sm mb-4 rounded" style="background-color: #FAF6F0;">
     <div class="container-fluid">
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
             <div>
-                <h1 class="m-0 fw-bold text-dark"><i class="fas fa-hotel me-2"></i>Dashboard Resepsionis</h1>
+                <h1 class="m-0 fw-bold" style="color:#4E342E;">
+                    <i class="fas fa-hotel me-2"></i>Dashboard Resepsionis
+                </h1>
                 <small class="text-muted">Selamat datang kembali, {{ auth()->user()->name }}!</small>
             </div>
-            <!-- <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">Beranda</a></li>
-                <li class="breadcrumb-item active">Dashboard</li>
-            </ol> -->
         </div>
     </div>
 </div>
@@ -53,7 +66,7 @@
 <section class="content">
     <div class="container-fluid">
 
-        {{-- Kartu Statistik --}}
+        {{-- Statistik --}}
         <div class="row">
             @php
                 $cards = [
@@ -65,7 +78,7 @@
             @endphp
 
             @foreach ($cards as $card)
-                <div class="col-md-3 col-sm-6 mb-4">
+                <div class="col-lg-3 col-md-6 col-12 mb-4">
                     <div class="card stat-card h-100 shadow-sm">
                         <div class="card-body d-flex justify-content-between align-items-center">
                             <div>
@@ -84,7 +97,7 @@
             <div class="col-md-6">
                 <div class="card shadow-sm border-0">
                     <div class="card-header bg-white fw-bold">
-                        <i class="fas fa-sign-in-alt me-1"></i> Check-in Hari Ini
+                        <i class="fas fa-sign-in-alt me-1" style="color:#C9A227;"></i> Check-in Hari Ini
                     </div>
                     <div class="card-body">
                         @forelse ($checkInsToday->take(5) as $booking)
@@ -105,7 +118,7 @@
             <div class="col-md-6">
                 <div class="card shadow-sm border-0">
                     <div class="card-header bg-white fw-bold">
-                        <i class="fas fa-sign-out-alt me-1"></i> Check-out Hari Ini
+                        <i class="fas fa-sign-out-alt me-1" style="color:#C9A227;"></i> Check-out Hari Ini
                     </div>
                     <div class="card-body">
                         @forelse ($checkOutsToday->take(5) as $booking)
@@ -127,7 +140,7 @@
         {{-- Booking Terbaru --}}
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <strong><i class="fas fa-history me-1"></i> Booking Terbaru</strong>
+                <strong><i class="fas fa-history me-1" style="color:#C9A227;"></i> Booking Terbaru</strong>
                 <a href="{{ route('resepsionis.bookings.index') }}" class="btn btn-sm btn-outline-primary">
                     <i class="fas fa-eye"></i> Lihat Semua
                 </a>
@@ -135,10 +148,9 @@
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead style="background-color: #fdeff2;">
+                        <thead style="background-color: #FAF6F0;">
                             <tr>
                                 <th>Nama Tamu</th>
-                                <th>Kamar</th>
                                 <th>Check-in</th>
                                 <th>Check-out</th>
                                 <th>Status</th>
@@ -148,10 +160,9 @@
                             @forelse ($recentBookings as $booking)
                                 <tr>
                                     <td>{{ optional($booking->guest)->name }}</td>
-                                    <td>{{ optional($booking->room)->room_number }}</td>
                                     <td>{{ \Carbon\Carbon::parse($booking->check_in)->format('d M Y') }}</td>
                                     <td>{{ \Carbon\Carbon::parse($booking->check_out)->format('d M Y') }}</td>
-                                    <td><span class="badge">{{ ucfirst(str_replace('_', ' ', $booking->status)) }}</span></td>
+                                    <td><span class="badge-status rounded-pill">{{ ucfirst(str_replace('_', ' ', $booking->status)) }}</span></td>
                                 </tr>
                             @empty
                                 <tr><td colspan="5" class="text-center text-muted">Tidak ada booking terbaru.</td></tr>

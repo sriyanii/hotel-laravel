@@ -11,7 +11,7 @@
 @section('content')
 <div class="container py-4">
     <div class="card border-0 shadow rounded-4">
-        <div class="card-header bg-gradient-pink text-white py-3 px-4 rounded-top-4 d-flex justify-content-between align-items-center">
+        <div class="card-header bg-gradient-gold text-white py-3 px-4 rounded-top-4 d-flex justify-content-between align-items-center">
             <h5 class="mb-0">
                 <i class="fas fa-bed me-2"></i>
                 {{ $isEdit ? 'Edit Kamar' : 'Tambah Kamar' }}
@@ -21,7 +21,7 @@
             </a>
         </div>
 
-        <div class="card-body p-4">
+        <div class="card-body p-4" style="background-color: #FAF6F0;">
             @if($errors->any())
                 <div class="alert alert-danger rounded-3">
                     <ul class="mb-0">
@@ -41,7 +41,7 @@
 
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label for="number" class="form-label fw-semibold">Nomor Kamar <span class="text-danger">*</span></label>
+                        <label for="number" class="form-label fw-semibold" style="color: #4E342E;">Nomor Kamar <span class="text-danger">*</span></label>
                         <input type="text" id="number" name="number"
                                class="form-control rounded-pill @error('number') is-invalid @enderror"
                                value="{{ old('number', $room->number ?? '') }}" required>
@@ -49,7 +49,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="type" class="form-label fw-semibold">Tipe Kamar <span class="text-danger">*</span></label>
+                        <label for="type" class="form-label fw-semibold" style="color: #4E342E;">Tipe Kamar <span class="text-danger">*</span></label>
                         <input type="text" id="type" name="type"
                                class="form-control rounded-pill @error('type') is-invalid @enderror"
                                value="{{ old('type', $room->type ?? '') }}" required>
@@ -57,7 +57,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="price" class="form-label fw-semibold">Harga per Malam <span class="text-danger">*</span></label>
+                        <label for="price" class="form-label fw-semibold" style="color: #4E342E;">Harga per Malam <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text rounded-start-pill">Rp</span>
                             <input type="number" id="price" name="price"
@@ -68,7 +68,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="status" class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
+                        <label for="status" class="form-label fw-semibold" style="color: #4E342E;">Status <span class="text-danger">*</span></label>
                         <select id="status" name="status"
                                 class="form-select rounded-pill @error('status') is-invalid @enderror" required>
                             <option value="">-- Pilih Status --</option>
@@ -83,13 +83,13 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="description" class="form-label">Deskripsi Kamar</label>
+                        <label for="description" class="form-label" style="color: #4E342E;">Deskripsi Kamar</label>
                         <textarea name="description" id="description" class="form-control" rows="4">{{ old('description', $isEdit ? $room->description : '') }}</textarea>
                     </div>
 
 
                     <div class="col-12">
-                        <label for="photo" class="form-label fw-semibold">Foto Kamar</label>
+                        <label for="photo" class="form-label fw-semibold" style="color: #4E342E;">Foto Kamar</label>
                         <input type="file" name="photo" id="photo"
                                class="form-control @error('photo') is-invalid @enderror"
                                accept="image/*" onchange="previewImage(this)">
@@ -113,7 +113,7 @@
                         <a href="{{ route("$prefix.rooms.index") }}" class="btn btn-outline-secondary rounded-pill px-4">
                             <i class="fas fa-times me-1"></i> Batal
                         </a>
-                        <button type="submit" class="btn btn-pink rounded-pill px-4">
+                        <button type="submit" class="btn btn-gold rounded-pill px-4">
                             <i class="fas fa-save me-1"></i> {{ $isEdit ? 'Update' : 'Simpan' }}
                         </button>
                     </div>
@@ -124,24 +124,34 @@
 </div>
 
 <style>
-    .bg-gradient-pink {
-        background: linear-gradient(135deg, #ff6a9f, #ffb5d2);
+    .bg-gradient-gold {
+        background: linear-gradient(135deg, #C9A227, #FFD700);
     }
 
-    .btn-pink {
-        background-color: #ff6a9f;
+    .btn-gold {
+        background-color: #C9A227;
         border: none;
         color: white;
     }
 
-    .btn-pink:hover {
-        background-color: #ff3e84;
+    .btn-gold:hover {
+        background-color: #B08D1E;
         color: white;
     }
 
     .img-thumbnail {
         border-radius: 8px;
         object-fit: cover;
+        border-color: #C9A227;
+    }
+
+    .card {
+        border-color: #C9A227;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #C9A227;
+        box-shadow: 0 0 0 0.25rem rgba(201, 162, 39, 0.25);
     }
 </style>
 

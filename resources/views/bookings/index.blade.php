@@ -1,27 +1,27 @@
 @extends('layouts.adminlte')
 @section('title', 'Daftar Booking')
 @section('content')
-<div class="container py-4">
-    <div class="card shadow-sm border-0 rounded-lg overflow-hidden">
+<div class="container py-4" style="background-color: #FAF6F0;">
+    <div class="card shadow-sm border-0 rounded-lg overflow-hidden" style="border-top: 4px solid #C9A227;">
         <!-- HEADER -->
-        <div class="card-header bg-pink-gradient text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">
+        <div class="card-header bg-gradient-gold text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0" style="color: #4E342E;">
                 <i class="fas fa-bed me-2"></i> Daftar Booking
             </h4>
-            <a href="{{ route(auth()->user()->role . '.bookings.create') }}" class="btn btn-light text-pink fw-semibold">
+            <a href="{{ route(auth()->user()->role . '.bookings.create') }}" class="btn btn-light text-gold fw-semibold">
                 <i class="fas fa-plus me-1"></i> Tambah Booking
             </a>
         </div>
 
         <!-- BODY -->
-        <div class="card-body">
+        <div class="card-body" style="background-color: #fff;">
             @if(session('success'))
-                <div class="alert alert-success rounded-pill px-4 py-2 mb-4">
+                <div class="alert alert-success rounded-pill px-4 py-2 mb-4" style="border-left: 4px solid #4E342E;">
                     <i class="fa-solid fa-check-circle me-2"></i> {{ session('success') }}
                 </div>
             @endif
 
-            <h6 class="mb-3 text-secondary fw-bold">
+            <h6 class="mb-3 fw-bold" style="color: #4E342E;">
                 <i class="fas fa-list me-2"></i> List Booking Kamar
             </h6>
 
@@ -33,16 +33,16 @@
             @else
                 <div class="table-responsive">
                     <table class="table table-hover align-middle text-center">
-                        <thead class="table-light">
+                        <thead class="table-light" style="background-color: #f5f5f5;">
                             <tr>
-                                <th>No</th>
-                                <th>Nama Tamu</th>
-                                <th>Kamar</th>
-                                <th>Durasi</th>
-                                <th>Harga Permalam</th>
-                                <th>Status</th>
-                                <th>Petugas</th>
-                                <th>Aksi</th>
+                                <th style="color: #4E342E;">No</th>
+                                <th style="color: #4E342E;">Nama Tamu</th>
+                                <th style="color: #4E342E;">Kamar</th>
+                                <th style="color: #4E342E;">Durasi</th>
+                                <th style="color: #4E342E;">Harga Permalam</th>
+                                <th style="color: #4E342E;">Status</th>
+                                <th style="color: #4E342E;">Petugas</th>
+                                <th style="color: #4E342E;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -51,7 +51,7 @@
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $booking->guest->name }}</td>
                                     <td>
-                                        <span class="badge bg-soft-pink text-dark">
+                                        <span class="badge bg-soft-gold">
                                             Kamar {{ $booking->room->number }} - {{ $booking->room->type }}
                                         </span>
                                     </td>
@@ -106,19 +106,19 @@
     </div>
 </div>
 
-<!-- Pastikan style pink juga tersedia -->
 <style>
-    .bg-pink-gradient {
-        background: linear-gradient(90deg, #f8bbd0, #f48fb1);
+    .bg-gradient-gold {
+        background: linear-gradient(90deg, #C9A227, #FFD700);
     }
-    .text-pink {
-        color: #d63384 !important;
+    .text-gold {
+        color: #C9A227 !important;
     }
-    .bg-soft-pink {
-        background-color: #ffe2ec;
+    .bg-soft-gold {
+        background-color: #FFF8E1;
+        color: #4E342E;
     }
-    .btn-light.text-pink:hover {
-        background-color: #f1a5c3 !important;
+    .btn-light.text-gold:hover {
+        background-color: #C9A227 !important;
         color: white !important;
     }
     .badge {
@@ -128,6 +128,19 @@
     }
     .table th, .table td {
         vertical-align: middle;
+    }
+    .card {
+        box-shadow: 0 4px 12px rgba(78, 52, 46, 0.1);
+    }
+    .table-light {
+        background-color: #f9f9f9;
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(201, 162, 39, 0.05);
+    }
+    .alert-success {
+        background-color: #f6ffed;
+        border-color: #b7eb8f;
     }
 </style>
 @endsection

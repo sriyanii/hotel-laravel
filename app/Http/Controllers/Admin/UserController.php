@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use App\Models\ActivityLog;
 
 class UserController extends Controller
 {
@@ -29,12 +28,16 @@ class UserController extends Controller
             'name'     => 'required',
             'email'    => 'required|email|unique:users',
             'password' => 'required|min:6',
-            'photo'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'phone'    => 'required',
+            'address'  => 'required',
+            'photo'   => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $user = new User();
         $user->name = $request->name;
         $user->email = $request->email;
+        $user->phone = $request->phone;
+        $user->address = $request->address;
         $user->role = 'resepsionis';
         $user->password = Hash::make($request->password);
         $user->password_plain = $request->password;
@@ -63,12 +66,16 @@ class UserController extends Controller
         $request->validate([
             'name'     => 'required',
             'email'    => 'required|email|unique:users,email,' . $user->id,
+            'phone'   => 'required',
+            'address'  => 'required',
             'password' => 'nullable|min:6',
             'photo'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $user->name = $request->name;
         $user->email = $request->email;
+        $user->phone = $request->phone;
+        $user->address = $request->address;
 
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
@@ -76,7 +83,6 @@ class UserController extends Controller
         }
 
         if ($request->hasFile('photo')) {
-            // Hapus foto lama jika ada
             if ($user->photo) {
                 Storage::disk('public')->delete('photos/' . $user->photo);
             }

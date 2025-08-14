@@ -5,12 +5,12 @@
 @section('content')
 <style>
     body {
-        background-color: #fff5f7;
+        background-color: #FAF6F0; /* Cream hangat */
     }
 
     .stat-card {
-        background: linear-gradient(135deg, #fce4ec, #f8bbd0);
-        color: #6b0033;
+        background: linear-gradient(135deg, #FAF6F0, #C9A227); /* Cream ke gold */
+        color: #4E342E; /* Cokelat tua */
         border: none;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
@@ -21,21 +21,21 @@
     }
 
     .quick-links a {
-        border-color: #f48fb1;
-        color: #880e4f;
+        border-color: #C9A227;
+        color: #4E342E;
         flex: 1 1 calc(50% - 10px);
     }
 
     .quick-links a:hover {
-        background-color: #f8bbd0;
-        color: #6b0033;
+        background-color: #FFD700; /* Gold terang */
+        color: #3E2723; /* Dark brown */
         transform: scale(1.05);
         transition: 0.3s;
     }
 
     .card-header.bg-white {
-        background-color: #fff0f5 !important;
-        color: #880e4f;
+        background-color: #FAF6F0 !important; /* Cream */
+        color: #4E342E; /* Cokelat tua */
     }
 
     .badge.bg-primary,
@@ -43,23 +43,23 @@
     .badge.bg-info,
     .badge.bg-danger,
     .badge.bg-secondary {
-        background-color: #f8bbd0 !important;
-        color: #6b0033;
+        background-color: #C9A227 !important; /* Gold */
+        color: #4E342E; /* Cokelat tua */
     }
 
     .badge-status {
-        background-color: #96515b !important;
+        background-color: #3E2723 !important; /* Dark brown */
         color: #fff !important;
         padding: 0.4em 0.75em;
         font-size: 0.85rem;
     }
 
     .breadcrumb-item a {
-        color: #d63384;
+        color: #C9A227;
     }
 
     canvas {
-        background-color: #fffafa;
+        background-color: #fff;
         border-radius: 8px;
         padding: 5px;
         max-width: 100%;
@@ -79,17 +79,13 @@
     }
 </style>
 
-<div class="content-header py-4 shadow-sm mb-4 rounded" style="background-color: #ffe5ec;">
+<div class="content-header py-4 shadow-sm mb-4 rounded" style="background-color: #FAF6F0;">
     <div class="container-fluid">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
             <div>
-                <h1 class="m-0 fw-bold text-dark"><i class="fas fa-hotel me-2"></i>Dashboard Admin Hotel Abadi</h1>
+                <h1 class="m-0 fw-bold" style="color:#4E342E;"><i class="fas fa-hotel me-2"></i>Dashboard Admin Hotel Abadi</h1>
                 <small class="text-muted">Selamat datang kembali, {{ auth()->user()->name }}!</small>
             </div>
-            <!-- <ol class="breadcrumb mt-2 mt-md-0">
-                <li class="breadcrumb-item"><a href="#">Beranda</a></li>
-                <li class="breadcrumb-item active">Dashboard</li>
-            </ol> -->
         </div>
     </div>
 </div>
@@ -128,7 +124,7 @@
             <div class="col-lg-12">
                 <div class="card shadow-sm border-0">
                     <div class="card-header bg-white fw-bold">
-                        <i class="fas fa-bolt me-1 text-pink"></i> Akses Cepat
+                        <i class="fas fa-bolt me-1" style="color:#C9A227;"></i> Akses Cepat
                     </div>
                     <div class="card-body d-flex flex-wrap gap-3">
                         <a href="{{ route('admin.rooms.index') }}" class="btn btn-outline-primary"><i class="fas fa-bed me-1"></i> Manajemen Kamar</a>
@@ -146,7 +142,7 @@
             <div class="col-lg-8 mb-4 mb-lg-0">
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-header bg-white fw-bold">
-                        <i class="fas fa-chart-line me-1 text-pink"></i> Statistik Booking Bulanan
+                        <i class="fas fa-chart-line me-1" style="color:#C9A227;"></i> Statistik Booking Bulanan
                     </div>
                     <div class="card-body" style="height: 300px;">
                         <canvas id="bookingChart"></canvas>
@@ -157,7 +153,7 @@
             <div class="col-lg-4">
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-header bg-white fw-bold">
-                        <i class="fas fa-user-plus me-1 text-pink"></i> User Terbaru
+                        <i class="fas fa-user-plus me-1" style="color:#C9A227;"></i> User Terbaru
                     </div>
                     <div class="card-body p-3">
                         @forelse($recentUsers as $user)
@@ -180,13 +176,13 @@
         {{-- Booking Aktif --}}
         <div class="card shadow-sm mb-4 border-0">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <strong><i class="fas fa-list me-1"></i> Booking Aktif</strong>
+                <strong><i class="fas fa-list me-1" style="color:#C9A227;"></i> Booking Aktif</strong>
                 <a href="{{ route('admin.bookings.index') }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i> Lihat Semua</a>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead style="background-color: #fdeff2;">
+                        <thead style="background-color: #FAF6F0;">
                             <tr>
                                 <th>Nama Tamu</th>
                                 <th>Check-in</th>
@@ -220,7 +216,7 @@
         {{-- Log Aktivitas --}}
         <div class="card shadow-sm border-0">
             <div class="card-header bg-white fw-bold">
-                <i class="fas fa-history text-secondary me-1"></i> Aktivitas Sistem Terakhir
+                <i class="fas fa-history me-1" style="color:#C9A227;"></i> Aktivitas Sistem Terakhir
             </div>
             <div class="card-body p-3">
                 @forelse($recentLogs as $log)
@@ -249,8 +245,8 @@
             datasets: [{
                 label: 'Jumlah Booking',
                 data: {!! json_encode($monthlyBookingCounts) !!},
-                backgroundColor: 'rgba(248, 187, 208, 0.3)',
-                borderColor: 'rgba(233, 30, 99, 1)',
+                backgroundColor: 'rgba(201, 162, 39, 0.2)',
+                borderColor: '#C9A227',
                 borderWidth: 2,
                 tension: 0.4,
                 fill: true,
