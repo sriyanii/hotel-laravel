@@ -10,28 +10,25 @@ use App\Models\ActivityLog;
 class RoomController extends Controller
 {
     public function index(Request $request)
-{
-    $query = Room::query();
+    {
+        $query = Room::query();
 
-    $statusFilter = $request->input('status_filter', 'all');
-    $allowedStatuses = ['tersedia', 'terisi', 'maintenance', 'all'];
+        $statusFilter = $request->input('status_filter', 'all');
+        $allowedStatuses = ['tersedia', 'terisi', 'maintenance', 'dipesan', 'all'];
 
-    if (!in_array($statusFilter, $allowedStatuses)) {
-        $statusFilter = 'all';
+        if (!in_array($statusFilter, $allowedStatuses)) {
+            $statusFilter = 'all';
+        }
+
+        if ($statusFilter !== 'all') {
+            $query->where('status', $statusFilter);
+        }
+
+        $rooms = $query->paginate(10);
+        $currentStatus = $statusFilter;
+
+        return view('rooms.index', compact('rooms', 'currentStatus'));
     }
-
-    if ($statusFilter !== 'all') {
-        $query->where('status', $statusFilter);
-    }
-
-    // Gunakan paginate agar bisa pakai ->hasPages() dan ->links()
-    $rooms = $query->paginate(10);
-
-    $currentStatus = $statusFilter;
-
-    return view('rooms.index', compact('rooms', 'currentStatus'));
-}
-
 
     public function create()
     {
@@ -55,14 +52,13 @@ class RoomController extends Controller
             $validated['photo'] = $request->file('photo')->store('room-photos', 'public');
         }
 
-        Room::create($validated);
+        $room = Room::create($validated);
 
-        // Log activity
         ActivityLog::create([
             'user_id' => auth()->id(),
             'activity_type' => 'create',
-            'description' => 'Menambahkan kamar baru: ' . $room->room_number,
-            'ip_address' => request()->ip(),
+            'description' => 'Menambahkan kamar baru: ' . $room->number,
+            'ip_address' => $request->ip(),
             'role' => auth()->user()->role
         ]);
 
@@ -92,7 +88,8 @@ class RoomController extends Controller
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
-        // Jika user centang hapus foto
+        $oldData = $room->toArray();
+
         if ($request->has('hapus_gambar')) {
             if ($room->photo) {
                 Storage::disk('public')->delete($room->photo);
@@ -109,19 +106,18 @@ class RoomController extends Controller
 
         $room->update($validated);
 
-        // Log activity
         ActivityLog::create([
             'user_id' => auth()->id(),
             'activity_type' => 'update',
-            'description' => 'Memperbarui data kamar: ' . $room->room_number,
-            'ip_address' => request()->ip(),
+            'description' => 'Memperbarui data kamar: ' . $room->number,
+            'ip_address' => $request->ip(),
             'role' => auth()->user()->role,
             'old_values' => json_encode($oldData),
             'new_values' => json_encode($validated)
         ]);
 
-        return redirect()->route('admin.rooms.index')
-            ->with('success', 'Ruangan berhasil diperbarui!');
+        return redirect()->route(auth()->user()->role . '.rooms.index')
+    ->with('success', 'Ruangan berhasil diperbarui!');
     }
 
     public function destroy(Room $room)
@@ -130,11 +126,10 @@ class RoomController extends Controller
             Storage::disk('public')->delete($room->photo);
         }
 
-        // Log activity sebelum dihapus
         ActivityLog::create([
             'user_id' => auth()->id(),
             'activity_type' => 'delete',
-            'description' => 'Menghapus kamar: ' . $room->room_number,
+            'description' => 'Menghapus kamar: ' . $room->number,
             'ip_address' => request()->ip(),
             'role' => auth()->user()->role,
             'old_values' => json_encode($room->toArray())

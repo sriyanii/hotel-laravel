@@ -118,7 +118,7 @@
             <i class="fas fa-user-circle me-2"></i> {{ auth()->user()->name ?? 'Admin' }}
             <form action="{{ route('logout') }}" method="POST" class="ms-3 mb-0">
                 @csrf
-                <button type="submit" class="btn btn-sm btn-outline-light">Logout</button>
+                <button type="submit" class="btn btn-sm btn-light">Logout</button>
             </form>
         </div>
     </nav>

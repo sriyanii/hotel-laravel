@@ -6,19 +6,19 @@
     $isEdit = isset($guest);
 @endphp
 
-<div class="container py-4" style="background-color: #FAF6F0;">
-    <div class="card shadow-sm border-0" style="border-top: 4px solid #C9A227;">
+<div class="container py-4">
+    <div class="card shadow-sm border-0">
 
         {{-- Header --}}
-        <div class="card-header bg-gradient-gold text-dark d-flex justify-content-between align-items-center">
-            <h4 class="mb-0 fw-bold" style="color: #4E342E;">
+        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: #3d3d3d">
+            <h4 class="mb-0 fw-bold">
                 <i class="fa-solid fa-user me-2"></i>
                 {{ $isEdit ? 'Edit Data Tamu' : 'Tambah Tamu Baru' }}
             </h4>
         </div>
 
         {{-- Body --}}
-        <div class="card-body" style="background-color: #fff;">
+        <div class="card-body">
             <form action="{{ $isEdit ? route("$prefix.guests.update", $guest->id) : route("$prefix.guests.store") }}" method="POST">
                 @csrf
                 @if ($isEdit)
@@ -28,7 +28,7 @@
                 <div class="row">
                     {{-- Nama --}}
                     <div class="col-md-6 mb-3">
-                        <label for="name" class="form-label fw-semibold" style="color: #4E342E;">Nama Lengkap</label>
+                        <label for="name" class="form-label fw-semibold">Nama Lengkap</label>
                         <input type="text" name="name" id="name"
                             class="form-control rounded-pill @error('name') is-invalid @enderror"
                             value="{{ old('name', $guest->name ?? '') }}"
@@ -40,7 +40,7 @@
 
                     {{-- Telepon --}}
                     <div class="col-md-6 mb-3">
-                        <label for="phone" class="form-label fw-semibold" style="color: #4E342E;">Nomor Telepon</label>
+                        <label for="phone" class="form-label fw-semibold">Nomor Telepon</label>
                         <input type="text" name="phone" id="phone"
                             class="form-control rounded-pill @error('phone') is-invalid @enderror"
                             value="{{ old('phone', $guest->phone ?? '') }}"
@@ -53,7 +53,7 @@
 
                 {{-- Nomor Identitas --}}
                 <div class="mb-3">
-                    <label for="identity_number" class="form-label fw-semibold" style="color: #4E342E;">Nomor Identitas (KTP/SIM)</label>
+                    <label for="identity_number" class="form-label fw-semibold">Nomor Identitas (KTP/SIM)</label>
                     <input type="text" name="identity_number" id="identity_number"
                         class="form-control rounded-pill @error('identity_number') is-invalid @enderror"
                         value="{{ old('identity_number', $guest->identity_number ?? '') }}"
@@ -68,8 +68,8 @@
                     <a href="{{ route("$prefix.guests.index") }}" class="btn btn-outline-secondary rounded-pill">
                         <i class="fa fa-arrow-left me-1"></i> Kembali
                     </a>
-                    <button type="submit" class="btn btn-gold rounded-pill">
-                        <i class="fa fa-save me-1"></i> Simpan
+                    <button type="submit" class="btn rounded-pill"  style="background: #5e5e5e">
+                        <i class="fa fa-save me-1 text-white"></i> Simpan
                     </button>
                 </div>
             </form>
@@ -77,20 +77,20 @@
     </div>
 </div>
 
-{{-- Custom Styles --}}
-<style>
-    .bg-gradient-gold {
-        background: linear-gradient(90deg, #C9A227, #FFD700);
+{{-- Gaya pink soft --}}
+<!-- <style>
+    .bg-soft-pink {
+        background: linear-gradient(90deg, #f8d7da, #fce4ec);
     }
 
-    .btn-gold {
-        background-color: #C9A227;
+    .btn-pink {
+        background-color: #f06292;
         color: white;
         border: none;
     }
 
-    .btn-gold:hover {
-        background-color: #B08D1E;
+    .btn-pink:hover {
+        background-color: #ec407a;
         color: white;
     }
 
@@ -99,26 +99,10 @@
     }
 
     .form-control:focus {
-        border-color: #C9A227;
-        box-shadow: 0 0 0 0.2rem rgba(201, 162, 39, 0.25);
+        border-color: #f06292;
+        box-shadow: 0 0 0 0.2rem rgba(240, 98, 146, 0.25);
     }
-
-    .card {
-        box-shadow: 0 4px 12px rgba(78, 52, 46, 0.1);
-    }
-
-    .rounded-pill {
-        border-radius: 50rem !important;
-    }
-
-    .btn-outline-secondary {
-        border-color: #6c757d;
-        color: #6c757d;
-    }
-
-    .btn-outline-secondary:hover {
-        background-color: #6c757d;
-        color: white;
-    }
-</style>
+</style> -->
 @endsection
+
+

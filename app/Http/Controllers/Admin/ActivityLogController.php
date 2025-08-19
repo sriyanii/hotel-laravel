@@ -50,7 +50,11 @@ class ActivityLogController extends Controller
             $query->whereDate('created_at', '<=', $request->end_date);
         }
 
-        $activities = $query->paginate(10);
+        $activities = $query
+    ->paginate(5)
+    ->onEachSide(1) 
+    ->appends($request->query());
+
 
         return view('admin.activities.index', [
             'activities' => $activities,
