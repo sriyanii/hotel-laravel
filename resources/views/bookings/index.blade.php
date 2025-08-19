@@ -112,13 +112,13 @@
         background: linear-gradient(90deg, #f8bbd0,rgb(18, 80, 212));
     } */
     .text-pink {
-        color: #d63384 !important;
+        color:rgb(78, 77, 78) !important;
     }
     .bg-soft-pink {
-        background-color: #ffe2ec;
+        background-color:rgb(173, 173, 173);
     }
     .btn-light.text-pink:hover {
-        background-color: #f1a5c3 !important;
+        background-color:rgb(134, 133, 134) !important;
         color: white !important;
     }
     .badge {

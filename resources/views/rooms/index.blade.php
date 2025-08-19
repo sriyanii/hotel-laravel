@@ -17,7 +17,7 @@
     <div class="card shadow border-0 rounded-4 overflow-hidden">
 
         {{-- HEADER --}}
-        <div class="card-header text-white py-3 d-flex justify-content-between align-items-center" style="background: #3d3d3d">
+        <div class="card-header text-white d-flex justify-content-between align-items-center rounded-top-4" style="background: #3d3d3d">
             <h4 class="mb-0 fw-bold"><i class="fas fa-bed me-2"></i> Manajemen Kamar</h4>
             @if (auth()->user()->role === 'admin')
                 <a href="{{ route($prefix . '.rooms.create') }}" class="btn btn-light text-dark fw-semibold">
@@ -44,7 +44,7 @@
                     <div class="btn-group flex-wrap gap-2">
                         @foreach(['all' => 'Semua', 'tersedia' => 'Tersedia', 'terisi' => 'Terisi', 'maintenance' => 'Maintenance'] as $status => $label)
                             <a href="{{ route($prefix . '.rooms.index', array_merge(['status_filter' => $status], request()->except('status_filter', 'page'))) }}"
-                               class="btn btn-sm {{ request('status_filter', 'all') === $status ? 'btn-outline-secondary' : 'btn-outline-secondary' }} rounded-pill px-3 shadow-lg">
+                               class="btn btn-sm {{ request('status_filter', 'all') === $status ? 'btn-outline-secondary' : 'btn-outline-secondary' }} rounded-pill px-3 shadow-sm">
                                 {{ $label }}
                             </a>
                         @endforeach

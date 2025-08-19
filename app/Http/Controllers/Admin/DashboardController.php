@@ -20,7 +20,9 @@ class DashboardController extends Controller
         $totalRooms   = Room::count();
         $totalGuests  = Guest::count();
         $bookingsToday = Booking::whereDate('created_at', today())->count();
-        $revenueThisMonth = Payment::whereMonth('created_at', now()->month)->sum('amount');
+        $revenueThisMonth = Payment::whereYear('created_at', now()->year)
+                                   ->whereMonth('created_at', now()->month)
+                                   ->sum('amount');
 
         $stats = [
             'totalRooms'      => $totalRooms,
@@ -60,9 +62,9 @@ class DashboardController extends Controller
         // === User terbaru ===
         $recentUsers = User::latest()->take(5)->get();
 
-        // === Booking aktif ===
+        // === Booking aktif (booked & checked_in) ===
         $activeBookings = Booking::with(['guest', 'room'])
-            ->where('status', 'booked', 'checked_out')
+            ->whereIn('status', ['booked', 'checked_in'])
             ->orderBy('check_in')
             ->take(10)
             ->get();
@@ -86,21 +88,23 @@ class DashboardController extends Controller
             ->orderBy('check_out', 'asc')
             ->get();
 
-        // === Data grafik bulanan booking ===
+        // === Data grafik bulanan booking (perbaikan) ===
         $monthlyData = Booking::select(
                 DB::raw('MONTH(created_at) as month'),
                 DB::raw('COUNT(*) as count')
             )
+            ->whereYear('created_at', now()->year) // hanya tahun ini
             ->groupBy('month')
             ->orderBy('month')
             ->pluck('count', 'month')
             ->toArray();
 
         $monthlyLabels = [];
-        $monthlyCounts = array_fill(0, 12, 0);
-        foreach ($monthlyData as $month => $count) {
-            $monthlyLabels[] = Carbon::create()->month($month)->translatedFormat('F');
-            $monthlyCounts[$month - 1] = $count;
+        $monthlyCounts = [];
+
+        for ($i = 1; $i <= 12; $i++) {
+            $monthlyLabels[] = Carbon::create()->month($i)->translatedFormat('M');
+            $monthlyCounts[] = $monthlyData[$i] ?? 0;
         }
 
         // === Simpan log akses dashboard ===
