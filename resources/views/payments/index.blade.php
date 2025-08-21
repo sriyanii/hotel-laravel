@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container py-4">
-    <div class="card shadow rounded-4 border-0">
+    <div class="card shadow rounded-2 border-0">
 
         {{-- HEADER --}}
         <div class="card-header text-white d-flex justify-content-between align-items-center rounded-top-4" style="background: #3d3d3d">
@@ -106,8 +106,8 @@
 <!-- Payment Detail Modal -->
 <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content rounded-4 border-0 shadow">
-            <div class="modal-header bg-pink-soft text-dark rounded-top-4">
+        <div class="modal-content rounded-2 border-0 shadow">
+            <div class="modal-header text-white rounded-top-2" style="background: #3d3d3d">
                 <h5 class="modal-title fw-bold" id="paymentModalLabel">
                     <i class="fas fa-receipt me-2"></i> Detail Pembayaran
                 </h5>

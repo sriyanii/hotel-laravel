@@ -60,7 +60,12 @@ class DashboardController extends Controller
         ];
 
         // === User terbaru ===
-        $recentUsers = User::latest()->take(5)->get();
+        $recentUsers = User::where('role', 'resepsionis')
+    ->latest()
+    ->take(5)
+    ->get();
+
+    // $recentUsers = User::latest()->take(5)->get();
 
         // === Booking aktif (booked & checked_in) ===
         $activeBookings = Booking::with(['guest', 'room'])

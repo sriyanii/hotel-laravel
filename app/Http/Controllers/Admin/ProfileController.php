@@ -92,12 +92,21 @@ class AdminController extends Controller
         ]);
 
         if ($request->hasFile('photo')) {
-            // Delete old photo if exists
-            if ($user->photo) {
-                Storage::disk('public')->delete($user->photo);
-            }
-            $validated['photo'] = $request->file('photo')->store('user-photos', 'public');
+    // Hapus foto lama jika ada
+    if ($user->photo) {
+        $oldPath = 'photos/' . $user->photo;
+        if (Storage::disk('public')->exists($oldPath)) {
+            Storage::disk('public')->delete($oldPath);
         }
+    }
+
+    // Simpan foto ke folder 'photos' dan simpan hanya nama file
+    $file = $request->file('photo');
+    $filename = uniqid() . '.' . $file->extension();
+    $file->storeAs('photos', $filename, 'public');
+
+    $validated['photo'] = $filename; // hanya nama file, tanpa path
+}
 
         $user->update($validated);
 

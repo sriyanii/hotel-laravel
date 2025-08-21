@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use App\Models\ActivityLog;
 
 class AdminProfileController extends Controller
@@ -43,26 +44,41 @@ class AdminProfileController extends Controller
             $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email,' . auth()->id(),
+                'phone' => 'nullable|string|max:20',
+                'address' => 'nullable|string',
+                'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'password' => 'nullable|string|min:8|confirmed',
             ]);
 
             $user = auth()->user();
             $oldData = $user->toArray();
-            $data = $request->only('name', 'email');
+            $data = $request->only('name', 'email', 'phone', 'address');
 
+            // Upload foto jika ada
+            if ($request->hasFile('photo')) {
+                // Hapus foto lama jika ada
+                if ($user->photo && Storage::exists('public/' . $user->photo)) {
+                    Storage::delete('public/' . $user->photo);
+                }
+                $data['photo'] = $request->file('photo')->store('profile_photos', 'public');
+            }
+
+            // Update password jika diisi
             if ($request->filled('password')) {
                 $data['password'] = Hash::make($request->password);
+                // Opsional: simpan plain text password (TIDAK DISARANKAN, tapi jika harus)
+                // $data['password_plain'] = $request->password; // Hati-hati! Risiko keamanan
             }
 
             $user->update($data);
-            
-            // Log changes
+
+            // Log perubahan
             $changes = [];
             foreach ($data as $key => $value) {
                 if ($oldData[$key] != $value) {
                     $changes[$key] = [
-                        'old' => $key === 'password' ? '********' : $oldData[$key],
-                        'new' => $key === 'password' ? '********' : $value
+                        'old' => in_array($key, ['password', 'password_plain', 'photo']) ? '********' : $oldData[$key],
+                        'new' => in_array($key, ['password', 'password_plain', 'photo']) ? '********' : $value
                     ];
                 }
             }
@@ -116,9 +132,16 @@ class AdminProfileController extends Controller
                 return back()->withErrors(['current_password' => 'Password saat ini salah.']);
             }
 
-            $user->update([
-                'password' => Hash::make($request->new_password)
-            ]);
+            // Update password
+            $data = ['password' => Hash::make($request->new_password)];
+            // Opsional: simpan password plain (TIDAK AMAN!)
+            // $data['password_plain'] = $request->new_password;
+
+            $user->update($data);
+
+            // Update waktu perubahan password
+            // Jika Anda menambahkan kolom `password_changed_at`
+            // $user->update(['password_changed_at' => now()]);
 
             $this->logActivity(
                 'Berhasil mengubah password',
@@ -159,7 +182,7 @@ class AdminProfileController extends Controller
                 'method' => request()->method(),
                 'url' => request()->fullUrl(),
                 'referer' => request()->header('referer'),
-                'data' => $type === 'error' ? null : json_encode(request()->except(['password', '_token']))
+                'data' => $type === 'error' ? null : json_encode(request()->except(['password', 'current_password', 'new_password', '_token']))
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to log activity: ' . $e->getMessage());

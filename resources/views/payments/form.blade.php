@@ -5,7 +5,7 @@
     $role = auth()->user()->role;
 @endphp
 
-<div class="container py-3">
+<div class="container py-4">
     <!-- Modal Konfirmasi Pembayaran -->
     <div class="modal fade" id="paymentMismatchModal" tabindex="-1" role="dialog" aria-labelledby="paymentMismatchModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -43,8 +43,8 @@
 </div>
 
 
-    <div class="card shadow rounded-4 border-0">
-        <div class="card-header bg-pink-soft text-dark d-flex align-items-center rounded-top-4">
+    <div class="card shadow-sm rounded-4 border-0">
+        <div class="card-header text-white d-flex align-items-center rounded-top-2" style="background: #3d3d3d">
             <h4 class="mb-0 fw-bold">
                 <i class="fas fa-cash-register me-2"></i>
                 @isset($payment->id) Edit @else Buat @endisset Transaksi

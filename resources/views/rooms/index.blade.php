@@ -13,11 +13,11 @@
     $prefix = auth()->user()->role === 'admin' ? 'admin' : 'resepsionis';
 @endphp
 
-<div class="container-fluid py-3">
-    <div class="card shadow border-0 rounded-4 overflow-hidden">
+<div class="container-fluid py-4">
+    <div class="card shadow-sm border-0 rounded-2 overflow-hidden">
 
         {{-- HEADER --}}
-        <div class="card-header text-white d-flex justify-content-between align-items-center rounded-top-4" style="background: #3d3d3d">
+        <div class="card-header text-white d-flex justify-content-between align-items-center rounded-top-2" style="background: #3d3d3d">
             <h4 class="mb-0 fw-bold"><i class="fas fa-bed me-2"></i> Manajemen Kamar</h4>
             @if (auth()->user()->role === 'admin')
                 <a href="{{ route($prefix . '.rooms.create') }}" class="btn btn-light text-dark fw-semibold">
@@ -27,7 +27,7 @@
         </div>
 
         {{-- FILTER --}}
-        <div class="card-body border-bottom bg-light">
+        <div class="card-body border-bottom" style="background-color:rgb(243, 243, 243)">
             <form class="row gy-3 gx-3 align-items-center" method="GET" action="{{ route($prefix . '.rooms.index') }}">
                 {{-- Kolom Pencarian --}}
                 <div class="col-12 col-md-6">
@@ -128,33 +128,5 @@
 </div>
 
 {{-- STYLE --}}
-<!-- <style>
-    .bg-gradient-pink {
-        background: linear-gradient(90deg, #f48fb1, #f06292);
-    }
-    .table-gold thead {
-        background: #C9A227;
-        color: #fff;
-    }
-    .btn-gold-soft {
-        background-color: #C9A227;
-        color: #fff;
-    }
-    .btn-gold-soft:hover {
-        background-color: #b8921f;
-        color: white;
-    }
-    .btn-outline-gold-soft {
-        border: 1px solid #C9A227;
-        color: #C9A227;
-        background: white;
-    }
-    .btn-outline-gold-soft:hover {
-        background-color: #C9A227;
-        color: white;
-    }
-    .table-hover tbody tr:hover {
-        background-color: #fff8e1;
-    }
-</style> -->
+
 @endsection

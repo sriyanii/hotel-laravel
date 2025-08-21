@@ -27,7 +27,7 @@
     }
 
     .quick-links a:hover {
-        background-color: #FFD700; /* Gold terang */
+        background-color:rgb(230, 230, 230); /* Gold terang */
         color: #3E2723; /* Dark brown */
         transform: scale(1.05);
         transition: 0.3s;
