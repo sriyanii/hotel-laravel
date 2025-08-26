@@ -6,8 +6,6 @@
     <h1 class="fw-bold text-dark"><i class="fas fa-bed me-2 text-white"></i>Manajemen Kamar</h1>
 @stop
 
-@php use Illuminate\Support\Facades\Storage; @endphp
-
 @section('content')
 @php
     $prefix = auth()->user()->role === 'admin' ? 'admin' : 'resepsionis';
@@ -42,9 +40,9 @@
                 {{-- Kolom Filter Status --}}
                 <div class="col-12 col-md-6 text-md-end">
                     <div class="btn-group flex-wrap gap-2">
-                        @foreach(['all' => 'Semua', 'tersedia' => 'Tersedia', 'terisi' => 'Terisi', 'maintenance' => 'Maintenance'] as $status => $label)
+                        @foreach(['all' => 'Semua', 'tersedia' => 'Tersedia', 'terisi' => 'Terisi', 'maintenance' => 'Maintenance', 'dipesan' => 'Dipesan'] as $status => $label)
                             <a href="{{ route($prefix . '.rooms.index', array_merge(['status_filter' => $status], request()->except('status_filter', 'page'))) }}"
-                               class="btn btn-sm {{ request('status_filter', 'all') === $status ? 'btn-outline-secondary' : 'btn-outline-secondary' }} rounded-pill px-3 shadow-sm">
+                               class="btn btn-sm {{ request('status_filter', 'all') === $status ? 'btn-primary' : 'btn-outline-secondary' }} rounded-pill px-3 shadow-sm">
                                 {{ $label }}
                             </a>
                         @endforeach
@@ -75,10 +73,10 @@
                 <tbody>
                     @foreach ($rooms as $room)
                     <tr>
-                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ $loop->iteration + ($rooms->currentPage() - 1) * $rooms->perPage() }}</td>
                         <td>
                             @if ($room->photo)
-                                <img src="{{ Storage::url($room->photo) }}" class="rounded-3 shadow-sm" style="height: 60px; width: 100px; object-fit: cover;">
+                                <img src="{{ asset('imge/' . $room->photo) }}" class="rounded-3 shadow-sm" style="height: 60px; width: 100px; object-fit: cover;">
                             @else
                                 <span class="text-muted fst-italic">Tidak ada</span>
                             @endif
@@ -87,7 +85,12 @@
                         <td>{{ $room->number }}</td>
                         <td>Rp{{ number_format($room->price, 0, ',', '.') }}</td>
                         <td>
-                            <span class="badge px-3 py-2 rounded-pill bg-{{ $room->status === 'tersedia' ? 'success' : ($room->status === 'terisi' ? 'danger' : ($room->status === 'maintenance' ? 'warning' : 'secondary')) }}">
+                            <span class="badge px-3 py-2 rounded-pill bg-{{ 
+                                $room->status === 'tersedia' ? 'success' : 
+                                ($room->status === 'terisi' ? 'danger' : 
+                                ($room->status === 'maintenance' ? 'warning' : 
+                                ($room->status === 'dipesan' ? 'info' : 'secondary'))) 
+                            }}">
                                 {{ ucfirst($room->status) }}
                             </span>
                         </td>
@@ -127,6 +130,78 @@
     </div>
 </div>
 
-{{-- STYLE --}}
-
+<style>
+    .table-gold {
+        background: linear-gradient(135deg, #3d3d3d 0%, #5a5a5a 100%);
+        color: white;
+    }
+    
+    .table-gold th {
+        border: none;
+        padding: 15px 10px;
+        font-weight: 600;
+        text-align: center;
+    }
+    
+    .table-gold th:first-child {
+        border-top-left-radius: 10px;
+    }
+    
+    .table-gold th:last-child {
+        border-top-right-radius: 10px;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(61, 61, 61, 0.05);
+    }
+    
+    .btn-outline-warning {
+        border-color: #ffc107;
+        color: #ffc107;
+    }
+    
+    .btn-outline-warning:hover {
+        background-color: #ffc107;
+        color: #000;
+    }
+    
+    .btn-outline-info {
+        border-color: #0dcaf0;
+        color: #0dcaf0;
+    }
+    
+    .btn-outline-info:hover {
+        background-color: #0dcaf0;
+        color: #000;
+    }
+    
+    .btn-outline-danger {
+        border-color: #dc3545;
+        color: #dc3545;
+    }
+    
+    .btn-outline-danger:hover {
+        background-color: #dc3545;
+        color: #fff;
+    }
+    
+    .rounded-circle {
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .badge {
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .bg-success { background-color: #198754 !important; }
+    .bg-danger { background-color: #dc3545 !important; }
+    .bg-warning { background-color: #ffc107 !important; color: #000; }
+    .bg-info { background-color: #0dcaf0 !important; color: #000; }
+    .bg-secondary { background-color: #6c757d !important; }
+</style>
 @endsection

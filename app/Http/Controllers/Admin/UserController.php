@@ -43,8 +43,11 @@ class UserController extends Controller
         $user->password_plain = $request->password;
 
         if ($request->hasFile('photo')) {
-            $photo = $request->file('photo')->store('photos', 'public');
-            $user->photo = basename($photo);
+            // Simpan foto ke public/imge
+            $photo = $request->file('photo');
+            $photoName = time() . '_' . $photo->getClientOriginalName();
+            $photo->move(public_path('imge'), $photoName);
+            $user->photo = $photoName;
         }
 
         $user->save();
@@ -83,12 +86,16 @@ class UserController extends Controller
         }
 
         if ($request->hasFile('photo')) {
-            if ($user->photo) {
-                Storage::disk('public')->delete('photos/' . $user->photo);
+            // Hapus foto lama jika ada
+            if ($user->photo && file_exists(public_path('imge/' . $user->photo))) {
+                unlink(public_path('imge/' . $user->photo));
             }
 
-            $photo = $request->file('photo')->store('photos', 'public');
-            $user->photo = basename($photo);
+            // Simpan foto baru ke public/imge
+            $photo = $request->file('photo');
+            $photoName = time() . '_' . $photo->getClientOriginalName();
+            $photo->move(public_path('imge'), $photoName);
+            $user->photo = $photoName;
         }
 
         $user->save();
@@ -98,8 +105,9 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        if ($user->photo) {
-            Storage::disk('public')->delete('photos/' . $user->photo);
+        // Hapus foto dari public/imge
+        if ($user->photo && file_exists(public_path('imge/' . $user->photo))) {
+            unlink(public_path('imge/' . $user->photo));
         }
 
         $user->delete();

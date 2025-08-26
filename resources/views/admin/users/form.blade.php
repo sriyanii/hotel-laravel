@@ -30,7 +30,8 @@
         <div class="card-body px-4 py-4">
             <form 
                 action="{{ isset($user) ? route('admin.users.update', $user->id) : route('admin.users.store') }}" 
-                method="POST" enctype="multipart/form-data"
+                method="POST" 
+                enctype="multipart/form-data"
             >
                 @csrf
                 @if(isset($user)) @method('PUT') @endif
@@ -87,12 +88,15 @@
                             <input type="file" name="photo" class="form-control @error('photo') is-invalid @enderror" accept="image/*">
                             @error('photo') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
+
+                        {{-- Tampilkan foto jika edit --}}
                         @if(isset($user))
                             <div class="text-center mt-3">
-                                <img src="{{ $user->photo ? asset('storage/photos/' . $user->photo) : asset('img/default-avatar.png') }}" 
-                                     alt="Foto Resepsionis" 
-                                     class="rounded-circle shadow border border-primary"
-                                     style="width: 120px; height: 120px; object-fit: cover;">
+                                <img 
+                                    src="{{ $user->photo ? asset('imge/' . $user->photo) : asset('img/default-avatar.png') }}" 
+                                    alt="Foto Resepsionis" 
+                                    class="rounded-circle shadow border border-primary"
+                                    style="width: 120px; height: 120px; object-fit: cover;">
                             </div>
                         @endif
                     </div>

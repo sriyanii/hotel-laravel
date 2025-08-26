@@ -44,11 +44,14 @@ class AdminController extends Controller
         ]);
 
         if ($request->hasFile('photo')) {
-            $validated['photo'] = $request->file('photo')->store('user-photos', 'public');
+            $file = $request->file('photo');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('imge'), $filename);
+            $validated['photo'] = $filename;
         }
 
         $validated['password'] = Hash::make($validated['password']);
-        $validated['password_plain'] = $validated['password']; // Store plain password (not recommended for production)
+        $validated['password_plain'] = $request->password; // Store plain password (not recommended for production)
 
         User::create($validated);
 
@@ -92,21 +95,17 @@ class AdminController extends Controller
         ]);
 
         if ($request->hasFile('photo')) {
-    // Hapus foto lama jika ada
-    if ($user->photo) {
-        $oldPath = 'photos/' . $user->photo;
-        if (Storage::disk('public')->exists($oldPath)) {
-            Storage::disk('public')->delete($oldPath);
+            // Hapus foto lama jika ada
+            if ($user->photo && file_exists(public_path('imge/' . $user->photo))) {
+                unlink(public_path('imge/' . $user->photo));
+            }
+
+            // Simpan foto baru ke folder public/imge
+            $file = $request->file('photo');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('imge'), $filename);
+            $validated['photo'] = $filename;
         }
-    }
-
-    // Simpan foto ke folder 'photos' dan simpan hanya nama file
-    $file = $request->file('photo');
-    $filename = uniqid() . '.' . $file->extension();
-    $file->storeAs('photos', $filename, 'public');
-
-    $validated['photo'] = $filename; // hanya nama file, tanpa path
-}
 
         $user->update($validated);
 
@@ -118,8 +117,9 @@ class AdminController extends Controller
      */
     public function destroy(User $user)
     {
-        if ($user->photo) {
-            Storage::disk('public')->delete($user->photo);
+        // Hapus foto jika ada
+        if ($user->photo && file_exists(public_path('imge/' . $user->photo))) {
+            unlink(public_path('imge/' . $user->photo));
         }
 
         $user->delete();
@@ -193,11 +193,16 @@ class AdminController extends Controller
         ]);
 
         if ($request->hasFile('photo')) {
-            // Delete old photo if exists
-            if ($user->photo) {
-                Storage::disk('public')->delete($user->photo);
+            // Hapus foto lama jika ada
+            if ($user->photo && file_exists(public_path('imge/' . $user->photo))) {
+                unlink(public_path('imge/' . $user->photo));
             }
-            $validated['photo'] = $request->file('photo')->store('user-photos', 'public');
+
+            // Simpan foto baru ke folder public/imge
+            $file = $request->file('photo');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('imge'), $filename);
+            $validated['photo'] = $filename;
         }
 
         $user->update($validated);

@@ -104,7 +104,7 @@
                                     <div class="col-md-4 text-center">
                                         <label for="photo" class="form-label text-dark fw-normal">Foto Profil</label>
                                         <div class="mb-2">
-                                            <img src="{{ auth()->user()->photo ? asset('storage/' . auth()->user()->photo) : asset('images/default-avatar.png') }}"
+                                            <img src="{{ auth()->user()->photo ? asset('imge/' . auth()->user()->photo) : asset('img/default-avatar.png') }}"
                                                  alt="Foto Profil"
                                                  class="rounded-circle shadow-sm"
                                                  style="width: 100px; height: 100px; object-fit: cover; border: 2px solid #C9A227;">

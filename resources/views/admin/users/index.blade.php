@@ -124,7 +124,7 @@
                             </div>
                             <div class="text-center mt-3">
                                 <img id="photoPreview" 
-                                     src="{{ isset($editUser) && $editUser->photo ? asset('storage/photos/' . $editUser->photo) : asset('img/default-avatar.png') }}" 
+                                     src="{{ isset($editUser) && $editUser->photo ? asset('imge/' . $editUser->photo) : asset('img/default-avatar.png') }}" 
                                      alt="Foto Resepsionis" 
                                      class="rounded-circle shadow border border-gold"
                                      style="width: 150px; height: 150px; object-fit: cover;">
@@ -188,7 +188,7 @@
                                 <td class="fw-semibold">{{ $i + 1 }}</td>
                                 <td class="text-center">
                                     @if($user->photo)
-                                        <img src="{{ asset('storage/photos/' . $user->photo) }}" 
+                                        <img src="{{ asset('imge/' . $user->photo) }}" 
                                              alt="Foto" 
                                              width="50" height="50"
                                              class="rounded-circle shadow-sm border border-gold"

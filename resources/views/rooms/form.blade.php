@@ -72,7 +72,7 @@
                         <select id="status" name="status"
                                 class="form-select rounded-pill @error('status') is-invalid @enderror" required>
                             <option value="">-- Pilih Status --</option>
-                            @foreach(['tersedia', 'terisi', 'maintenance'] as $status)
+                            @foreach(['tersedia', 'terisi', 'maintenance', 'dipesan'] as $status)
                                 <option value="{{ $status }}"
                                     {{ old('status', $room->status ?? '') === $status ? 'selected' : '' }}>
                                     {{ ucfirst($status) }}
@@ -87,7 +87,6 @@
                         <textarea name="description" id="description" class="form-control" rows="4">{{ old('description', $isEdit ? $room->description : '') }}</textarea>
                     </div>
 
-
                     <div class="col-12">
                         <label for="photo" class="form-label fw-semibold">Foto Kamar</label>
                         <input type="file" name="photo" id="photo"
@@ -98,7 +97,7 @@
                         <div class="mt-3" id="imagePreviewContainer">
                             @if ($currentPhoto)
                                 <div class="d-flex align-items-center gap-3">
-                                    <img src="{{ asset('storage/' . $currentPhoto) }}" class="img-thumbnail"
+                                    <img src="{{ asset('imge/' . $currentPhoto) }}" class="img-thumbnail"
                                          style="max-width: 150px; max-height: 150px;">
                                     <div class="form-check">
                                         <input type="checkbox" name="hapus_gambar" id="hapus_gambar" class="form-check-input">
@@ -113,7 +112,7 @@
                         <a href="{{ route("$prefix.rooms.index") }}" class="btn btn-outline-secondary rounded-pill px-4">
                             <i class="fas fa-times me-1"></i> Batal
                         </a>
-                        <button type="submit" class="btn btn-outline-secondary rounded-pill px-4">
+                        <button type="submit" class="btn btn-primary rounded-pill px-4">
                             <i class="fas fa-save me-1"></i> {{ $isEdit ? 'Update' : 'Simpan' }}
                         </button>
                     </div>
@@ -123,32 +122,48 @@
     </div>
 </div>
 
-<!-- <style>
-    .bg-gradient-pink {
-        background: linear-gradient(135deg, #ff6a9f, #ffb5d2);
+<style>
+    .card {
+        border-radius: 12px;
+        overflow: hidden;
     }
-
-    .btn-pink {
-        background-color: #ff6a9f;
+    
+    .card-header {
+        background: linear-gradient(135deg, #3d3d3d 0%, #5a5a5a 100%);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #3d3d3d 0%, #5a5a5a 100%);
         border: none;
-        color: white;
     }
-
-    .btn-pink:hover {
-        background-color: #ff3e84;
-        color: white;
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #5a5a5a 0%, #3d3d3d 100%);
+        transform: translateY(-2px);
     }
-
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #3d3d3d;
+        box-shadow: 0 0 0 0.2rem rgba(61, 61, 61, 0.25);
+    }
+    
     .img-thumbnail {
         border-radius: 8px;
         object-fit: cover;
+        border: 2px solid #dee2e6;
     }
-</style> -->
+    
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: #ced4da;
+    }
+</style>
 
 <script>
     function previewImage(input) {
         const previewContainer = document.getElementById('imagePreviewContainer');
         previewContainer.innerHTML = '';
+        
         if (input.files && input.files[0]) {
             const reader = new FileReader();
             reader.onload = function (e) {
@@ -162,7 +177,19 @@
             reader.readAsDataURL(input.files[0]);
         }
     }
+
+    // Validasi form
+    document.addEventListener('DOMContentLoaded', function() {
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    });
 </script>
 @endsection
-
-

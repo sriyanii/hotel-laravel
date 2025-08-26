@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use App\Models\ActivityLog;
 
 class AdminProfileController extends Controller
@@ -56,18 +55,22 @@ class AdminProfileController extends Controller
 
             // Upload foto jika ada
             if ($request->hasFile('photo')) {
-                // Hapus foto lama jika ada
-                if ($user->photo && Storage::exists('public/' . $user->photo)) {
-                    Storage::delete('public/' . $user->photo);
+                // Hapus foto lama dari public/imge jika ada
+                if ($user->photo && file_exists(public_path('imge/' . $user->photo))) {
+                    unlink(public_path('imge/' . $user->photo));
                 }
-                $data['photo'] = $request->file('photo')->store('profile_photos', 'public');
+
+                // Simpan foto baru ke public/imge
+                $file = $request->file('photo');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('imge'), $filename);
+
+                $data['photo'] = $filename;
             }
 
             // Update password jika diisi
             if ($request->filled('password')) {
                 $data['password'] = Hash::make($request->password);
-                // Opsional: simpan plain text password (TIDAK DISARANKAN, tapi jika harus)
-                // $data['password_plain'] = $request->password; // Hati-hati! Risiko keamanan
             }
 
             $user->update($data);
@@ -75,10 +78,10 @@ class AdminProfileController extends Controller
             // Log perubahan
             $changes = [];
             foreach ($data as $key => $value) {
-                if ($oldData[$key] != $value) {
+                if (($oldData[$key] ?? null) != $value) {
                     $changes[$key] = [
-                        'old' => in_array($key, ['password', 'password_plain', 'photo']) ? '********' : $oldData[$key],
-                        'new' => in_array($key, ['password', 'password_plain', 'photo']) ? '********' : $value
+                        'old' => in_array($key, ['password', 'photo']) ? '********' : ($oldData[$key] ?? null),
+                        'new' => in_array($key, ['password', 'photo']) ? '********' : $value
                     ];
                 }
             }
@@ -134,14 +137,8 @@ class AdminProfileController extends Controller
 
             // Update password
             $data = ['password' => Hash::make($request->new_password)];
-            // Opsional: simpan password plain (TIDAK AMAN!)
-            // $data['password_plain'] = $request->new_password;
 
             $user->update($data);
-
-            // Update waktu perubahan password
-            // Jika Anda menambahkan kolom `password_changed_at`
-            // $user->update(['password_changed_at' => now()]);
 
             $this->logActivity(
                 'Berhasil mengubah password',

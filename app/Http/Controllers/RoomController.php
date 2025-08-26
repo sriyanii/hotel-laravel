@@ -49,7 +49,10 @@ class RoomController extends Controller
         ]);
 
         if ($request->hasFile('photo')) {
-            $validated['photo'] = $request->file('photo')->store('room-photos', 'public');
+            $file = $request->file('photo');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('imge'), $filename);
+            $validated['photo'] = $filename;
         }
 
         $room = Room::create($validated);
@@ -90,18 +93,25 @@ class RoomController extends Controller
 
         $oldData = $room->toArray();
 
+        // Hapus gambar jika checkbox di centang
         if ($request->has('hapus_gambar')) {
-            if ($room->photo) {
-                Storage::disk('public')->delete($room->photo);
-                $room->photo = null;
+            if ($room->photo && file_exists(public_path('imge/' . $room->photo))) {
+                unlink(public_path('imge/' . $room->photo));
             }
+            $validated['photo'] = null;
         }
 
+        // Upload gambar baru jika ada
         if ($request->hasFile('photo')) {
-            if ($room->photo) {
-                Storage::disk('public')->delete($room->photo);
+            // Hapus gambar lama jika ada
+            if ($room->photo && file_exists(public_path('imge/' . $room->photo))) {
+                unlink(public_path('imge/' . $room->photo));
             }
-            $validated['photo'] = $request->file('photo')->store('room-photos', 'public');
+            
+            $file = $request->file('photo');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('imge'), $filename);
+            $validated['photo'] = $filename;
         }
 
         $room->update($validated);
@@ -117,13 +127,14 @@ class RoomController extends Controller
         ]);
 
         return redirect()->route(auth()->user()->role . '.rooms.index')
-    ->with('success', 'Ruangan berhasil diperbarui!');
+            ->with('success', 'Ruangan berhasil diperbarui!');
     }
 
     public function destroy(Room $room)
     {
-        if ($room->photo) {
-            Storage::disk('public')->delete($room->photo);
+        // Hapus foto jika ada
+        if ($room->photo && file_exists(public_path('imge/' . $room->photo))) {
+            unlink(public_path('imge/' . $room->photo));
         }
 
         ActivityLog::create([
