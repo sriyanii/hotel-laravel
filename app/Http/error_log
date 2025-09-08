@@ -1,0 +1,12 @@
+[28-Aug-2025 08:12:57 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Http\Kernel" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Kernel.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Kernel.php on line 7
+[29-Aug-2025 16:43:59 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Http\Kernel" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Kernel.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Kernel.php on line 7
+[02-Sep-2025 11:06:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Http\Kernel" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Kernel.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Kernel.php on line 7

@@ -12,17 +12,33 @@ use Illuminate\Support\Facades\DB;
 
 class PaymentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $payments = Payment::with(['booking.room', 'booking.guest'])
-                         ->orderBy('paid_at', 'desc')
-                         ->paginate(10);
+        // Get the search keyword from the request
+        $search = $request->input('search', '');
 
+        // Query payments and apply search if there's a keyword
+        $payments = Payment::with(['booking.room', 'booking.guest'])
+            ->whereHas('booking', function($query) use ($search) {
+                $query->whereHas('guest', function($query) use ($search) {
+                    $query->where('name', 'like', '%' . $search . '%')
+                          ->orWhere('phone', 'like', '%' . $search . '%')
+                          ->orWhere('identity_number', 'like', '%' . $search . '%');
+                })
+                ->orWhereHas('room', function($query) use ($search) {
+                    $query->where('number', 'like', '%' . $search . '%');
+                });
+            })
+            ->orderBy('paid_at', 'desc')
+            ->paginate(5);  // Pagination: 5 payments per page
+
+        // Get the appropriate view based on the user role
         $view = view()->exists(auth()->user()->role . '.payments.index')
             ? auth()->user()->role . '.payments.index'
             : 'payments.index';
 
-        return view($view, compact('payments'));
+        // Return the view with payments and search keyword
+        return view($view, compact('payments', 'search'));
     }
 
     public function create()
@@ -47,6 +63,7 @@ class PaymentController extends Controller
 
     public function store(Request $request)
     {
+        // Validasi input data pembayaran
         $validatedData = $request->validate([
             'booking_id' => [
                 'required',
@@ -60,16 +77,18 @@ class PaymentController extends Controller
 
         $booking = Booking::with('room')->findOrFail($validatedData['booking_id']);
         
+        // Menghitung durasi menginap dan total tagihan
         $duration = Carbon::parse($booking->check_in)->diffInDays($booking->check_out);
         $calculatedTotal = $duration * $booking->room->price;
 
-        // Validasi jumlah pembayaran
+        // Validasi jumlah pembayaran untuk metode non-tunai
         if ($validatedData['method'] !== 'cash' && $validatedData['amount'] != $calculatedTotal) {
             return back()->withErrors([
                 'amount' => 'Untuk metode non-tunai, jumlah harus sama dengan total'
             ])->withInput();
         }
 
+        // Proses penyimpanan pembayaran dalam transaksi
         DB::transaction(function () use ($validatedData, $booking, $calculatedTotal) {
             $payment = Payment::create([
                 'booking_id' => $booking->id,
@@ -120,6 +139,7 @@ class PaymentController extends Controller
 
     public function update(Request $request, Payment $payment)
     {
+        // Validasi input data pembayaran
         $validatedData = $request->validate([
             'booking_id' => [
                 'required',
@@ -135,7 +155,7 @@ class PaymentController extends Controller
         $duration = Carbon::parse($booking->check_in)->diffInDays($booking->check_out);
         $total = $duration * $booking->room->price;
 
-        // Validasi jumlah pembayaran
+        // Validasi jumlah pembayaran untuk metode non-tunai
         if ($validatedData['method'] !== 'cash' && $validatedData['amount'] != $total) {
             return back()->withErrors([
                 'amount' => 'Untuk metode non-tunai, jumlah harus sama dengan total'
@@ -144,6 +164,7 @@ class PaymentController extends Controller
 
         $oldData = $payment->toArray();
 
+        // Proses pembaruan pembayaran dalam transaksi
         DB::transaction(function () use ($validatedData, $payment, $booking, $total, $oldData) {
             $payment->update([
                 'booking_id' => $booking->id,
@@ -173,6 +194,7 @@ class PaymentController extends Controller
     {
         $oldData = $payment->toArray();
 
+        // Proses penghapusan pembayaran dalam transaksi
         DB::transaction(function () use ($payment, $oldData) {
             // Log activity sebelum dihapus
             ActivityLog::create([

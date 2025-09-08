@@ -10,11 +10,23 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
-    public function index()
-    {
-        $users = User::where('role', 'resepsionis')->get();
-        return view('admin.users.index', compact('users'));
+    public function index(Request $request)
+{
+    $query = User::query();
+
+    if ($request->filled('search')) {
+        $search = $request->input('search');
+        $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%$search%")
+              ->orWhere('email', 'like', "%$search%")
+              ->orWhere('phone', 'like', "%$search%");
+        });
     }
+
+    $users = $query->paginate(5);
+
+    return view('admin.users.index', compact('users'));
+}
 
     public function create()
     {
@@ -30,6 +42,7 @@ class UserController extends Controller
             'password' => 'required|min:6',
             'phone'    => 'required',
             'address'  => 'required',
+            // 'role'     => 'required|in:admin,resepsionis',
             'photo'   => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -72,6 +85,7 @@ class UserController extends Controller
             'phone'   => 'required',
             'address'  => 'required',
             'password' => 'nullable|min:6',
+            // 'role'     => 'required|in:admin,resepsionis',
             'photo'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -102,6 +116,12 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')->with('success', 'Resepsionis diperbarui.');
     }
+
+    public function show(User $user)
+{
+    return view('admin.users.show', compact('user'));
+}
+
 
     public function destroy(User $user)
     {

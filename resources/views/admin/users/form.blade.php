@@ -79,6 +79,8 @@
                                 {{ isset($user) ? '' : 'required' }}>
                             @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
+
+                        
                     </div>
 
                     <div class="col-md-4">
@@ -103,7 +105,7 @@
                 </div>
 
                 <div class="mt-4 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary shadow-sm">
+                    <button type="submit" class="btn btn-outline-secondary">
                         <i class="fas fa-save me-1"></i> {{ isset($user) ? 'Update Data' : 'Simpan Resepsionis' }}
                     </button>
                     <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary">Batal</a>

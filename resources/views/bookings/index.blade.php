@@ -21,6 +21,20 @@
                 </div>
             @endif
 
+            {{-- Pencarian --}}
+            <form action="{{ route(auth()->user()->role . '.bookings.index') }}" method="GET" class="mb-4">
+                <div class="input-group">
+                    <input type="text" name="search" value="{{ request()->search }}" class="form-control" placeholder="Cari Nama Tamu atau Kamar" aria-label="Search Booking">
+                    <button type="submit" class="btn btn-outline-secondary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    {{-- Tombol Reset --}}
+                    <a href="{{ route(auth()->user()->role . '.bookings.index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+            </form>
+
             <h6 class="mb-3 text-secondary fw-bold">
                 <i class="fas fa-list me-2"></i> List Booking Kamar
             </h6>
@@ -81,20 +95,25 @@
                                     </td>
                                     <td>{{ $booking->user->name }}</td>
                                     <td class="text-center">
-                                        <a href="{{ route(auth()->user()->role . '.bookings.edit', $booking->id) }}"
-                                           class="btn btn-warning btn-sm me-1" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form action="{{ route(auth()->user()->role . '.bookings.destroy', $booking->id) }}"
-                                              method="POST"
-                                              class="d-inline"
-                                              onsubmit="return confirm('Yakin ingin menghapus booking ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="btn btn-danger btn-sm" title="Hapus">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
-                                        </form>
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="{{ route(auth()->user()->role . '.bookings.edit', $booking->id) }}"
+                                            class="btn btn-sm btn-outline-warning rounded-circle" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{{ route(auth()->user()->role . '.bookings.show', $booking->id) }}"
+                                            class="btn btn-sm btn-outline-info rounded-circle" title="Lihat">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <form action="{{ route(auth()->user()->role . '.bookings.destroy', $booking->id) }}"
+                                                method="POST"
+                                                onsubmit="return confirm('Yakin ingin menghapus booking ini?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="btn btn-sm btn-outline-danger rounded-circle" title="Hapus">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -102,15 +121,20 @@
                     </table>
                 </div>
             @endif
+
+            {{-- PAGINATION --}}
+            @if($bookings->hasPages())
+                <div class="d-flex justify-content-end my-4" style="margin-right: 30px;">
+                    {{ $bookings->appends(request()->query())->links() }}
+                </div>
+            @endif
+
         </div>
     </div>
 </div>
 
 <!-- Pastikan style pink juga tersedia -->
 <style>
-    /* .bg-pink-gradient {
-        background: linear-gradient(90deg, #f8bbd0,rgb(18, 80, 212));
-    } */
     .text-pink {
         color:rgb(78, 77, 78) !important;
     }

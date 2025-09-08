@@ -28,14 +28,21 @@
         <div class="card-body border-bottom" style="background-color:rgb(243, 243, 243)">
             <form class="row gy-3 gx-3 align-items-center" method="GET" action="{{ route($prefix . '.rooms.index') }}">
                 {{-- Kolom Pencarian --}}
-                <div class="col-12 col-md-6">
-                    <input 
-                        type="search" 
-                        name="search" 
-                        class="form-control rounded-pill shadow-sm" 
-                        placeholder="Cari tipe kamar..." 
-                        value="{{ request('search') }}">
-                </div>
+                <form action="{{ route($prefix . '.rooms.index') }}" method="GET" class="mb-4">
+    <div class="input-group">
+        <input type="text" name="search" class="form-control" placeholder="Cari Nama Tamu atau Kamar" value="{{ request('search') }}">
+        <button type="submit" class="btn btn-outline-secondary ms-2">
+            <i class="fas fa-search"></i>
+        </button>
+        @if(request('search'))
+            <a href="{{ route($prefix . '.rooms.index') }}" class="btn btn-outline-secondary" title="Clear">
+                <i class="fas fa-times"></i>
+            </a>
+        @endif
+    </div>
+</form>
+
+<hr>
 
                 {{-- Kolom Filter Status --}}
                 <div class="col-12 col-md-6 text-md-end">
@@ -120,7 +127,7 @@
 
             {{-- PAGINATION --}}
             @if($rooms->hasPages())
-                <div class="d-flex justify-content-center my-4">
+                <div class="d-flex justify-content-end my-4" style="margin-right: 30px;">
                     {{ $rooms->appends(request()->query())->links() }}
                 </div>
             @endif

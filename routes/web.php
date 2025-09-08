@@ -38,6 +38,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'check.role:admin'])
     Route::resource('guests', GuestController::class);
     Route::resource('bookings', BookingController::class);
     Route::resource('users', UserController::class)->except('show');
+    Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
     Route::resource('payments', PaymentController::class);
 
     Route::prefix('profile')->name('profile.')->group(function () {

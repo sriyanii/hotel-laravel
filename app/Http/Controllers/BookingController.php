@@ -13,47 +13,34 @@ use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        try {
-            $bookings = Booking::with(['guest', 'room', 'user'])
-                            ->orderBy('created_at', 'desc')
-                            ->get();
+        $search = $request->get('search');
 
-            $view = view()->exists(auth()->user()->role . '.bookings.index')
-                ? auth()->user()->role . '.bookings.index'
-                : 'bookings.index';
+        $bookings = Booking::with(['guest', 'room', 'user'])
+            ->when($search, function ($query, $search) {
+                $query->whereHas('guest', function ($query) use ($search) {
+                    $query->where('name', 'like', '%' . $search . '%');
+                })
+                ->orWhereHas('room', function ($query) use ($search) {
+                    $query->where('number', 'like', '%' . $search . '%');
+                })
+                ->orWhere('status', 'like', '%' . $search . '%');
+            })
+            ->paginate(5);
 
-            return view($view, compact('bookings'));
-        } catch (\Exception $e) {
-            Log::error('Error accessing bookings index: ' . $e->getMessage());
-            return back()->with('error', 'Gagal memuat daftar booking.');
-        }
-
-        $rooms = Room::whereDoesntHave('bookings', function($query) {
-        $query->whereIn('status', ['booked', 'checked_in']);
-    })->get();
-
-    // Get only guests without active bookings
-    $guests = Guest::whereDoesntHave('bookings', function($query) {
-        $query->whereIn('status', ['booked', 'checked_in']);
-    })->get();
-
-    return view('bookings.form', [
-        'rooms' => $rooms,
-        'guests' => $guests,
-    ]);
+        return view('bookings.index', compact('bookings'));
     }
-    
+
     public function create()
     {
         try {
             $bookedRoomIds = Booking::whereNotIn('status', ['checked_out', 'canceled'])
-                            ->pluck('room_id');
-            
+                ->pluck('room_id');
+
             $rooms = Room::whereNotIn('id', $bookedRoomIds)->get();
             $guests = Guest::all();
-            
+
             return view('bookings.form', [
                 'booking' => null,
                 'rooms' => $rooms,
@@ -69,17 +56,17 @@ class BookingController extends Controller
     {
         try {
             $booking = Booking::findOrFail($id);
-            
+
             $bookedRoomIds = Booking::whereNotIn('status', ['checked_out', 'canceled'])
-                            ->where('id', '!=', $id)
-                            ->pluck('room_id');
-            
+                ->where('id', '!=', $id)
+                ->pluck('room_id');
+
             $rooms = Room::whereNotIn('id', $bookedRoomIds)
-                    ->orWhere('id', $booking->room_id)
-                    ->get();
-            
+                ->orWhere('id', $booking->room_id)
+                ->get();
+
             $guests = Guest::all();
-            
+
             return view('bookings.form', compact('booking', 'rooms', 'guests'));
         } catch (\Exception $e) {
             Log::error('Error accessing booking edit form: ' . $e->getMessage());
@@ -87,13 +74,24 @@ class BookingController extends Controller
         }
     }
 
+    public function show($id)
+    {
+        try {
+            $booking = Booking::with(['guest', 'room', 'user'])->findOrFail($id);
+            return view('bookings.show', compact('booking'));
+        } catch (\Exception $e) {
+            Log::error('Error accessing booking details: ' . $e->getMessage());
+            return back()->with('error', 'Gagal memuat detail booking.');
+        }
+    }
+
     public function store(Request $request)
     {
         try {
             $validated = $request->validate($this->validationRules());
-            
+
             $validated['user_id'] = auth()->id();
-            
+
             if ($request->filled('new_guest_name')) {
                 $guest = Guest::create([
                     'name' => $request->new_guest_name,
@@ -102,7 +100,7 @@ class BookingController extends Controller
                 ]);
                 $validated['guest_id'] = $guest->id;
             }
-            
+
             $booking = Booking::create($validated);
             $room = Room::find($validated['room_id']);
 
@@ -117,9 +115,9 @@ class BookingController extends Controller
                 'role' => auth()->user()->role,
                 'data' => json_encode($validated)
             ]);
-            
+
             return redirect()->route(auth()->user()->role . '.bookings.index')
-                   ->with('success', 'Booking berhasil dibuat');
+                ->with('success', 'Booking berhasil dibuat');
         } catch (\Exception $e) {
             Log::error('Error creating booking: ' . $e->getMessage());
             return back()->with('error', 'Gagal membuat booking.');
@@ -131,9 +129,9 @@ class BookingController extends Controller
         try {
             $booking = Booking::findOrFail($id);
             $oldData = $booking->toArray();
-            
-            $validated = $request->validate($this->validationRules());
-            
+
+            $validated = $request->validate($this->validationRules($id));
+
             if ($request->filled('new_guest_name')) {
                 $guest = Guest::create([
                     'name' => $request->new_guest_name,
@@ -142,7 +140,7 @@ class BookingController extends Controller
                 ]);
                 $validated['guest_id'] = $guest->id;
             }
-            
+
             $booking->update($validated);
 
             ActivityLog::create([
@@ -157,9 +155,9 @@ class BookingController extends Controller
                 'old_values' => json_encode($oldData),
                 'new_values' => json_encode($validated)
             ]);
-            
+
             return redirect()->route(auth()->user()->role . '.bookings.index')
-                   ->with('success', 'Booking berhasil diperbarui');
+                ->with('success', 'Booking berhasil diperbarui');
         } catch (\Exception $e) {
             Log::error('Error updating booking: ' . $e->getMessage());
             return back()->with('error', 'Gagal memperbarui booking.');
@@ -171,7 +169,7 @@ class BookingController extends Controller
         try {
             $booking = Booking::findOrFail($id);
             $bookingData = $booking->toArray();
-            
+
             ActivityLog::create([
                 'user_id' => auth()->id(),
                 'activity_type' => 'delete',
@@ -183,18 +181,21 @@ class BookingController extends Controller
                 'role' => auth()->user()->role,
                 'old_values' => json_encode($bookingData)
             ]);
-            
+
             $booking->delete();
-            
+
             return redirect()->route(auth()->user()->role . '.bookings.index')
-                   ->with('success', 'Booking berhasil dibatalkan');
+                ->with('success', 'Booking berhasil dibatalkan');
         } catch (\Exception $e) {
             Log::error('Error deleting booking: ' . $e->getMessage());
             return back()->with('error', 'Gagal membatalkan booking.');
         }
     }
 
-    protected function validationRules()
+    /**
+     * Validation rules with optional booking ID for update.
+     */
+    protected function validationRules($bookingId = null)
     {
         return [
             'guest_id' => 'nullable|exists:guests,id',
@@ -204,11 +205,14 @@ class BookingController extends Controller
             'room_id' => [
                 'required',
                 'exists:rooms,id',
-                function ($attribute, $value, $fail) {
+                function ($attribute, $value, $fail) use ($bookingId) {
                     $isBooked = Booking::where('room_id', $value)
-                                ->whereNotIn('status', ['checked_out', 'canceled'])
-                                ->exists();
-                    
+                        ->whereNotIn('status', ['checked_out', 'canceled'])
+                        ->when($bookingId, function ($query) use ($bookingId) {
+                            $query->where('id', '!=', $bookingId);
+                        })
+                        ->exists();
+
                     if ($isBooked) {
                         $fail('Kamar sudah dipesan.');
                     }

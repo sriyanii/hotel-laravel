@@ -71,15 +71,47 @@
         </a>
     </div>
 
-    {{-- Ringkasan Total Pendapatan --}}
+    {{-- Total Pendapatan & Target Bulanan side by side --}}
     <div class="row mb-4">
-        <div class="col-lg-4 col-md-6">
-            <div class="card bg-white border-0 shadow-soft border-primary-soft rounded-4">
+        <div class="col-lg-6 col-md-6 mb-3">
+            <div class="card bg-white border-0 shadow-soft border-primary-soft rounded-4 stat-card h-100">
                 <div class="card-body">
                     <h6 class="text-muted">Total Pendapatan</h6>
                     <h3 class="text-primary fw-bold mt-2">
                         Rp{{ number_format($totalPendapatan, 0, ',', '.') }}
                     </h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-md-6 mb-3">
+            <div class="card stat-card h-100 shadow-soft" style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-radius:12px;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                Rp{{ number_format($monthlyTarget ?? 0, 0, ',', '.') }}
+                            </h5>
+                            <p class="mb-1">Target Bulanan</p>
+                        </div>
+                        <i class="fas fa-bullseye fa-2x opacity-75"></i>
+                    </div>
+                    <div class="mt-3">
+                        @php
+                            $progress = isset($currentMonthRevenue, $monthlyTarget) && $monthlyTarget > 0 
+                                ? min(100, ($currentMonthRevenue / $monthlyTarget) * 100) 
+                                : 0;
+                        @endphp
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-primary" role="progressbar" 
+                                style="width: {{ $progress }}%" 
+                                aria-valuenow="{{ $progress }}" 
+                                aria-valuemin="0" 
+                                aria-valuemax="100">
+                            </div>
+                        </div>
+                        <small class="text-muted">{{ number_format($progress, 1) }}% tercapai</small>
+                    </div>
                 </div>
             </div>
         </div>
@@ -107,21 +139,12 @@
                     'value' => isset($averageMonthlyRevenue) ? 'Rp' . number_format($averageMonthlyRevenue, 0, ',', '.') : 'Rp0', 
                     'icon' => 'chart-line',
                     'bg' => 'linear-gradient(135deg, #f5f5f5, #e0e0e0)'
-                ],
-                [
-                    'label' => 'Target Bulanan', 
-                    'value' => 'Rp' . number_format($monthlyTarget ?? 0, 0, ',', '.'), 
-                    'icon' => 'bullseye',
-                    'bg' => 'linear-gradient(135deg, #e3f2fd, #bbdefb)',
-                    'progress' => isset($currentMonthRevenue, $monthlyTarget) 
-                        ? min(100, ($currentMonthRevenue/$monthlyTarget)*100) 
-                        : 0
-                ],
+                ]
             ];
         @endphp
 
         @foreach($monthlyStats as $stat)
-        <div class="col-lg-3 col-md-6 mb-4">
+        <div class="col-lg-4 col-md-6 mb-4">
             <div class="card stat-card h-100 shadow-sm" style="background: {{ $stat['bg'] }};">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-2">
@@ -141,26 +164,13 @@
                         <small class="text-muted ms-2">vs bulan lalu</small>
                     </div>
                     @endisset
-                    
-                    @isset($stat['progress'])
-                    <div class="mt-3">
-                        <div class="progress" style="height: 6px;">
-                            <div class="progress-bar bg-primary" role="progressbar" 
-                                 style="width: {{ $stat['progress'] }}%" 
-                                 aria-valuenow="{{ $stat['progress'] }}" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="100">
-                            </div>
-                        </div>
-                        <small class="text-muted">{{ number_format($stat['progress'], 1) }}% tercapai</small>
-                    </div>
-                    @endisset
                 </div>
             </div>
         </div>
         @endforeach
     </div>
 
+   
     {{-- Tabel Riwayat Pembayaran --}}
     <div class="card shadow-soft border-0 rounded-4">
         <div class="card-header bg-primary-soft border-0 d-flex justify-content-between align-items-center">
@@ -181,7 +191,7 @@
                 <tbody class="text-center">
                     @forelse ($payments as $key => $payment)
                         <tr>
-                            <td>{{ $key + 1 }}</td>
+                            <td>{{ $payments->firstItem() + $key }}</td>
                             <td>{{ $payment->booking->guest->name ?? '-' }}</td>
                             <td>{{ $payment->booking->room->number ?? '-' }}</td>
                             <td class="text-end">Rp{{ number_format($payment->amount, 0, ',', '.') }}</td>
@@ -199,6 +209,13 @@
                     @endforelse
                 </tbody>
             </table>
+
+            {{-- Pagination --}}
+            @if($payments->hasPages())
+                <div class="d-flex justify-content-end my-4" style="margin-right: 30px;">
+                    {{ $payments->appends(request()->query())->links() }}
+                </div>
+            @endif
         </div>
     </div>
 </div>

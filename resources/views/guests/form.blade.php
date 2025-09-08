@@ -68,10 +68,11 @@
                     <a href="{{ route("$prefix.guests.index") }}" class="btn btn-outline-secondary rounded-pill">
                         <i class="fa fa-arrow-left me-1"></i> Kembali
                     </a>
-                    <button type="submit" class="btn rounded-pill"  style="background: #5e5e5e">
+                    <button type="submit" class="btn btn-secondary rounded-pill">
                         <i class="fa fa-save me-1 text-white"></i> Simpan
                     </button>
                 </div>
+
             </form>
         </div>
     </div>

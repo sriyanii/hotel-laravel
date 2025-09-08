@@ -39,19 +39,45 @@
                         <div class="form-text">Hanya menampilkan tamu yang tidak memiliki booking aktif</div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold text-dark">Atau Tambah Tamu Baru</label>
-                        <div class="input-group">
-                            <input type="text" name="new_guest_name" class="form-control @error('new_guest_name') is-invalid @enderror" placeholder="Nama Tamu" value="{{ old('new_guest_name') }}">
-                            <input type="text" name="new_guest_phone" class="form-control @error('new_guest_phone') is-invalid @enderror" placeholder="No. Telepon" value="{{ old('new_guest_phone') }}">
-                            <input type="text" name="new_guest_identity" class="form-control @error('new_guest_identity') is-invalid @enderror" placeholder="No. Identitas" value="{{ old('new_guest_identity') }}">
-                        </div>
-                        @error('new_guest_name', 'new_guest_phone', 'new_guest_identity')
-                            <div class="text-danger small">{{ $message }}</div>
-                        @enderror
-                    </div>
+    <label class="form-label fw-semibold text-dark">Atau Tambah Tamu Baru</label>
+    <div class="row g-2">
+        <div class="col-12 col-md-4">
+            <input type="text" 
+                   name="new_guest_name" 
+                   class="form-control @error('new_guest_name') is-invalid @enderror" 
+                   placeholder="Nama Tamu" 
+                   value="{{ old('new_guest_name') }}">
+            @error('new_guest_name')
+                <div class="text-danger small">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="col-12 col-md-4">
+            <input type="text" 
+                   name="new_guest_phone" 
+                   class="form-control @error('new_guest_phone') is-invalid @enderror" 
+                   placeholder="No. Telepon" 
+                   value="{{ old('new_guest_phone') }}">
+            @error('new_guest_phone')
+                <div class="text-danger small">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="col-12 col-md-4">
+            <input type="text" 
+                   name="new_guest_identity" 
+                   class="form-control @error('new_guest_identity') is-invalid @enderror" 
+                   placeholder="No. Identitas" 
+                   value="{{ old('new_guest_identity') }}">
+            @error('new_guest_identity')
+                <div class="text-danger small">{{ $message }}</div>
+            @enderror
+        </div>
+    </div>
+</div>
+
                 </div>
 
-                <!-- Rest of your form remains the same -->
                 <!-- Room Selection -->
                 <div class="mb-3">
                     <label for="room_id" class="form-label fw-semibold text-dark">Pilih Kamar</label>
@@ -126,6 +152,7 @@
     </div>
 </div>
 
+<!-- Custom Styles -->
 <style>
     .bg-pink-gradient {
         background: linear-gradient(90deg, #f8bbd0, #f48fb1);
@@ -171,4 +198,5 @@
         }
     });
 </script>
+
 @endsection

@@ -27,6 +27,20 @@
                 </div>
             @endif
 
+            {{-- Search Form --}}
+            <form action="{{ route($prefix . '.guests.index') }}" method="GET" class="mb-4">
+                <div class="input-group">
+                    <input type="text" name="search" value="{{ request()->search }}" class="form-control" placeholder="Cari Tamu..." aria-label="Search Guests">
+                    <button type="submit" class="btn btn-outline-secondary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    {{-- Tombol Reset --}}
+                    <a href="{{ route($prefix . '.guests.index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+            </form>
+
             {{-- Judul --}}
             <h6 class="mb-3 text-secondary fw-bold">
                 <i class="fa-solid fa-address-book me-2"></i>List Tamu Terdaftar
@@ -40,7 +54,7 @@
                 </div>
             @else
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle text-center">
+                    <table class="table table-hover align-middle text-start">
                         <thead class="table-light">
                             <tr>
                                 <th>Nama</th>
@@ -60,18 +74,23 @@
                                         </span>
                                     </td>
                                     <td class="text-center">
-                                        <a href="{{ route($prefix . '.guests.edit', $guest->id) }}"
-                                           class="btn btn-warning btn-sm me-1" title="Edit">
-                                            <i class="fa fa-edit"></i>
+
+                                        <a href="{{ route($prefix . '.guests.edit', $guest->id) }}" class="btn btn-sm btn-outline-warning rounded-circle" title="Edit">
+                                            <i class="fas fa-edit"></i>
                                         </a>
+
+                                        <a href="{{ route($prefix . '.guests.show', $guest->id) }}" class="btn btn-sm btn-outline-info rounded-circle" title="Lihat">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+
                                         <form action="{{ route($prefix . '.guests.destroy', $guest->id) }}"
                                               method="POST"
                                               class="d-inline"
                                               onsubmit="return confirm('Yakin ingin menghapus tamu ini?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="btn btn-danger btn-sm" title="Hapus">
-                                                <i class="fa fa-trash-alt"></i>
+                                            <button class="btn btn-sm btn-outline-danger rounded-circle" title="Hapus">
+                                                <i class="fa fa-trash"></i>
                                             </button>
                                         </form>
                                     </td>
@@ -81,32 +100,41 @@
                     </table>
                 </div>
             @endif
+
+            {{-- PAGINATION --}}
+            @if($guests->hasPages())
+                <div class="d-flex justify-content-end my-4" style="margin-right: 30px;">
+                    {{ $guests->appends(request()->query())->links() }}
+                </div>
+            @endif
+
         </div>
 
     </div>
 </div>
 
 {{-- Custom Styles --}}
-<!-- <style>
-    .bg-pink-gradient {
-        background: linear-gradient(90deg, #f8bbd0, #f48fb1);
-    }
-
+<style>
     .text-pink {
-        color: #d63384 !important;
+        color:rgb(14, 13, 13) !important;
     }
 
     .bg-soft-pink {
-        background-color: #ffe2ec;
+        background-color:rgb(202, 202, 202);
     }
 
     .btn-light.text-pink:hover {
-        background-color: #f1a5c3 !important;
+        background-color:rgb(179, 174, 176) !important;
         color: white !important;
     }
 
     .table th, .table td {
         vertical-align: middle;
+        padding: 10px;
+    }
+
+    .table th {
+        text-align: left;
     }
 
     .badge {
@@ -114,7 +142,5 @@
         padding: 0.45em 0.8em;
         border-radius: 1rem;
     }
-</style> -->
+</style>
 @endsection
-
-

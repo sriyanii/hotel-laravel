@@ -16,8 +16,21 @@
             </a>
         </div>
 
-        {{-- TABLE --}}
+        {{-- SEARCH FORM --}}
         <div class="card-body">
+            <form action="{{ route('admin.payments.index') }}" method="GET" class="mb-4">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Cari Nama Tamu atau Kamar" value="{{ request('search') }}">
+                    <button type="submit" class="btn btn-outline-secondary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <a href="{{ route('admin.payments.index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>
+                    </a>
+               </div>
+            </form>
+
+            {{-- TABLE --}}
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
@@ -62,24 +75,37 @@
                                     </span>
                                 </td>
                                 <td>
+                                    @php
+                                        // Mapping Status Booking ke format lebih ramah pengguna
+                                        $statusMap = [
+                                            'booked' => 'Booked',
+                                            'checked_in' => 'Checked In',
+                                            'checked_out' => 'Checked Out',
+                                            'canceled' => 'Canceled',
+                                            'paid' => 'Paid'
+                                        ];
+                                        $status = $statusMap[$payment->booking->status] ?? '-';
+                                    @endphp
                                     <span class="badge bg-{{ $payment->status == 'completed' ? 'success' : 'warning' }}">
-                                        {{ ucfirst($payment->status) }}
+                                        {{ ucfirst($status) }}
                                     </span>
                                 </td>
                                 <td>
-                                    <button class="btn btn-sm btn-outline-info me-1 view-btn" 
+                                    <a href="{{ route('admin.payments.edit', $payment->id) }}" class="btn btn-sm btn-outline-warning rounded-circle me-1">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+
+                                    <button class="btn btn-sm btn-outline-info me-1 view-btn rounded-circle" 
                                             data-bs-toggle="modal" 
                                             data-bs-target="#paymentModal" 
                                             data-payment='@json($payment)'>
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <a href="{{ route('admin.payments.edit', $payment->id) }}" class="btn btn-sm btn-outline-warning me-1">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
+                                    
                                     <form action="{{ route('admin.payments.destroy', $payment->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus data pembayaran?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
@@ -95,7 +121,7 @@
             </div>
 
             {{-- Pagination --}}
-            <div class="mt-3">
+            <div class="d-flex justify-content-end my-4" style="margin-right: 30px;">
                 {{ $payments->links() }}
             </div>
         </div>
@@ -200,51 +226,41 @@
     </div>
 </div>
 
-{{-- CSS Tema Pink Soft --}}
-<!-- <style>
-    .bg-pink-soft {
-        background-color: #ffe4ec !important;
-    }
-    .btn-outline-pink-soft {
-        color: #d63384;
-        border: 1px solid #d63384;
-        background-color: transparent;
-    }
-    .btn-outline-pink-soft:hover {
-        background-color: #d63384;
-        color: #fff;
-    }
-    .badge.bg-pink-soft {
-        background-color: #f8d7e0;
-    }
-    .text-pink {
-        color: #d63384;
-    }
-</style> -->
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const viewButtons = document.querySelectorAll('.view-btn');
+    
     viewButtons.forEach(button => {
         button.addEventListener('click', function() {
             const paymentData = JSON.parse(this.getAttribute('data-payment'));
 
-            // Hitung durasi dari check_in ke check_out
+            // Mapping status booking
+            const bookingStatusMap = {
+                'booked': 'Booked',
+                'checked_in': 'Checked In',
+                'checked_out': 'Checked Out',
+                'canceled': 'Canceled',
+                'paid': 'Paid'
+            };
+
+            const bookingStatus = bookingStatusMap[paymentData.booking.status] || '-';
+
+            // Calculate duration and total bill
             const checkIn = new Date(paymentData.booking.check_in);
             const checkOut = new Date(paymentData.booking.check_out);
-            const durationInDays = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24)); // Konversi ke hari
+            const durationInDays = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
 
-            // Hitung total tagihan
+            // Calculate total bill
             const pricePerNight = parseFloat(paymentData.booking.room.price);
             const totalBill = pricePerNight * durationInDays;
             const amountPaid = parseFloat(paymentData.amount);
 
-            // Hitung kembalian (hanya jika cash dan bayar lebih)
+            // Calculate change (only for cash method and when the paid amount is greater)
             const change = (paymentData.method === 'cash' && amountPaid > totalBill)
                 ? amountPaid - totalBill
                 : 0;
 
-            // Format tanggal pembayaran
+            // Format paid date
             const paidDate = new Date(paymentData.paid_at);
             const formattedDate = paidDate.toLocaleDateString('id-ID', {
                 day: '2-digit',
@@ -254,7 +270,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 minute: '2-digit'
             });
 
-            // Isi modal
+            // Fill modal with payment data
             document.getElementById('modal-booking-id').textContent = '#' + paymentData.booking_id;
             document.getElementById('modal-room').textContent = 'Kamar ' + paymentData.booking.room.number;
             document.getElementById('modal-price').textContent = 'Rp ' + pricePerNight.toLocaleString('id-ID') + '/malam';
@@ -268,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 ? 'Rp ' + change.toLocaleString('id-ID')
                 : '-';
             document.getElementById('modal-method').textContent = paymentData.method.charAt(0).toUpperCase() + paymentData.method.slice(1);
-            document.getElementById('modal-status').textContent = paymentData.status.charAt(0).toUpperCase() + paymentData.status.slice(1);
+            document.getElementById('modal-status').textContent = bookingStatus;
             document.getElementById('modal-paid-at').textContent = formattedDate;
             document.getElementById('modal-notes').textContent = paymentData.notes || '-';
         });
@@ -276,4 +292,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
-

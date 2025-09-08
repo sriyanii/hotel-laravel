@@ -24,7 +24,7 @@ class UserActivityController extends Controller
     {
         $activities = UserActivity::with('user')
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->paginate(15);
 
         return view('admin.activities.index', compact('activities'));
     }

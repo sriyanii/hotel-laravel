@@ -25,14 +25,7 @@
       <form method="POST" action="{{ route('login.process') }}">
         @csrf
 
-        <div class="mb-3">
-          <label for="role" class="form-label">Login Sebagai</label>
-          <select class="form-select" name="role" id="role" required>
-            <option value="" disabled selected>-- Pilih Role --</option>
-            <option value="admin">Admin</option>
-            <option value="resepsionis">Resepsionis</option>
-          </select>
-        </div>
+        
 
         <div class="mb-3">
           <label for="email" class="form-label">Email</label>

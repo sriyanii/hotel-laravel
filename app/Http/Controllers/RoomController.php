@@ -13,6 +13,16 @@ class RoomController extends Controller
     {
         $query = Room::query();
 
+        // Pencarian berdasarkan nomor, tipe, atau status
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('number', 'like', '%' . $search . '%')
+                  ->orWhere('type', 'like', '%' . $search . '%')
+                  ->orWhere('status', 'like', '%' . $search . '%');
+            });
+        }
+
         $statusFilter = $request->input('status_filter', 'all');
         $allowedStatuses = ['tersedia', 'terisi', 'maintenance', 'dipesan', 'all'];
 
@@ -24,7 +34,7 @@ class RoomController extends Controller
             $query->where('status', $statusFilter);
         }
 
-        $rooms = $query->paginate(10);
+        $rooms = $query->paginate(5);
         $currentStatus = $statusFilter;
 
         return view('rooms.index', compact('rooms', 'currentStatus'));

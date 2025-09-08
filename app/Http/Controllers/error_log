@@ -1,0 +1,92 @@
+[30-Aug-2025 08:33:24 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "Illuminate\Routing\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Controller.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Controller.php on line 9
+[31-Aug-2025 10:52:47 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "Illuminate\Routing\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Controller.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Controller.php on line 9
+[31-Aug-2025 11:41:39 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/ReceptionistReportController.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/ReceptionistReportController.php on line 9
+[01-Sep-2025 13:23:25 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/ReceptionistReportController.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/ReceptionistReportController.php on line 9
+[02-Sep-2025 03:23:06 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/RoomController.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/RoomController.php on line 10
+[02-Sep-2025 09:03:44 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/AuthController.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/AuthController.php on line 8
+[02-Sep-2025 14:25:25 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/GuestController.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/GuestController.php on line 9
+[02-Sep-2025 15:10:17 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/GuestController.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/GuestController.php on line 9
+[02-Sep-2025 15:10:45 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/AuthController.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/AuthController.php on line 8
+[02-Sep-2025 15:17:51 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "Illuminate\Routing\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Controller.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Controller.php on line 9
+[02-Sep-2025 15:18:43 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/ReceptionistReportController.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/ReceptionistReportController.php on line 9
+[02-Sep-2025 15:25:06 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "Illuminate\Routing\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Controller.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Controller.php on line 9
+[02-Sep-2025 15:28:05 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/ReceptionistReportController.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/ReceptionistReportController.php on line 9
+[02-Sep-2025 15:31:03 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/AuthController.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/AuthController.php on line 8
+[02-Sep-2025 15:32:05 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/GuestController.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/GuestController.php on line 9
+[02-Sep-2025 22:27:58 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/RoomController.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/RoomController.php on line 10
+[03-Sep-2025 02:23:31 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/RoomController.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/RoomController.php on line 10
+[03-Sep-2025 10:11:59 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/PaymentController.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/PaymentController.php on line 13
+[03-Sep-2025 10:22:51 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/AuthController.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/AuthController.php on line 8
+[03-Sep-2025 10:25:57 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/BookingController.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/BookingController.php on line 14
+[03-Sep-2025 15:23:30 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/GuestController.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/GuestController.php on line 9
+[04-Sep-2025 09:18:06 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/BookingController.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/BookingController.php on line 14
+[04-Sep-2025 09:33:00 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/PaymentController.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/PaymentController.php on line 13

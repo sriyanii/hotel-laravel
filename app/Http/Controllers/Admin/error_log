@@ -1,0 +1,32 @@
+[02-Sep-2025 15:23:22 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Admin/LaporanKeuanganController.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Admin/LaporanKeuanganController.php on line 14
+[02-Sep-2025 15:35:08 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Admin/LaporanKeuanganController.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Admin/LaporanKeuanganController.php on line 14
+[02-Sep-2025 15:51:30 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Admin/LaporanKeuanganController.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Admin/LaporanKeuanganController.php on line 14
+[02-Sep-2025 21:15:11 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Admin/ActivityLogController.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Admin/ActivityLogController.php on line 10
+[03-Sep-2025 12:28:23 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Admin/UserController.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Admin/UserController.php on line 11
+[03-Sep-2025 18:26:11 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Admin/DashboardController.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Admin/DashboardController.php on line 15
+[03-Sep-2025 18:29:51 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Admin/ProfileController.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Admin/ProfileController.php on line 12
+[06-Sep-2025 02:27:23 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Admin/UserController.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/sorq2959/public_html/hotel.yani.my.id/app/Http/Controllers/Admin/UserController.php on line 11

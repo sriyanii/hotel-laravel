@@ -22,7 +22,7 @@ public function index()
     // Get all payments for the current year
     $payments = Payment::whereYear('paid_at', $currentYear)
         ->orderBy('created_at', 'desc')
-        ->get();
+        ->paginate(5);
     
     // Calculate total revenue
     $totalPendapatan = $payments->sum('amount');
