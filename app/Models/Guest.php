@@ -10,10 +10,27 @@ class Guest extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'phone', 'identity_number'];
+    protected $fillable = [
+        'guest_code',
+        'name',
+        'phone',
+        'identity_number',
+        'date_of_birth',
+        'notes',
+        'photo',
+        'marital_status',
+        'guest_type',
+        'address',           
+        'gender',            
+        'email',             
+    ];
+
+    protected $casts = [
+        'date_of_birth' => 'date',
+    ];
 
     /**
-     * Define the relationship between Guest and Booking
+     * Relationship with bookings
      */
     public function bookings(): HasMany
     {
@@ -28,5 +45,21 @@ class Guest extends Model
         return $this->bookings()
             ->whereIn('status', ['booked', 'checked_in'])
             ->exists();
+    }
+
+    /**
+     * Accessor to get age from date_of_birth
+     */
+    public function getAgeAttribute(): ?int
+    {
+        return $this->date_of_birth ? $this->date_of_birth->age : null;
+    }
+
+    /**
+     * Check if guest is VIP or VVIP
+     */
+    public function isVip(): bool
+    {
+        return in_array($this->guest_type, ['vip', 'vvip']);
     }
 }

@@ -42,11 +42,11 @@
                         </tr>
                         <tr>
                             <th class="text-muted">Tipe</th>
-                            <td>: {{ $room->type }}</td>
+                            <td>: {{ $room->tipeKamar?->tipe_kamar ?? 'Tipe tidak ditemukan' }}</td>
                         </tr>
                         <tr>
-                            <th class="text-muted">Harga</th>
-                            <td>: Rp{{ number_format($room->price, 0, ',', '.') }}</td>
+                            <th class="text-muted">Tipe</th>
+                            <td>: {{ $room->tipeKamar?->tipe_kamar ?? 'Tipe tidak ditemukan' }}</td>
                         </tr>
                         <tr>
                             <th class="text-muted">Status</th>

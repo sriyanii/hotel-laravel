@@ -12,11 +12,11 @@ class Room extends Model
 
     protected $fillable = [
         'number',
-        'type',
         'price',
         'status',
         'photo',
         'description',
+        'tipe_kamar_id',
     ];
 
     protected $casts = [
@@ -42,4 +42,18 @@ class Room extends Model
             })
             ->exists();
     }
+
+public function tipeKamar()
+{
+    return $this->belongsTo(TipeKamar::class, 'tipe_kamar_id');
+}
+
+
+
+
+    public function bookedRoomsCount()
+    {
+        return $this->whereIn('status', ['terisi', 'maintenance', 'dipesan'])->count();
+    }
+
 }

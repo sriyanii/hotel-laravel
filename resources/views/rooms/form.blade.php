@@ -48,13 +48,21 @@
                         @error('number')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
 
-                    <div class="col-md-6">
-                        <label for="type" class="form-label fw-semibold">Tipe Kamar <span class="text-danger">*</span></label>
-                        <input type="text" id="type" name="type"
-                               class="form-control rounded-pill @error('type') is-invalid @enderror"
-                               value="{{ old('type', $room->type ?? '') }}" required>
-                        @error('type')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
+<div class="col-md-6">
+    <label for="tipe_kamar_id" class="form-label fw-semibold">Tipe Kamar <span class="text-danger">*</span></label>
+    <select id="tipe_kamar_id" name="tipe_kamar_id"
+            class="form-select rounded-pill @error('tipe_kamar_id') is-invalid @enderror" required>
+        <option value="">-- Pilih Tipe Kamar --</option>
+        @foreach($tipeKamar as $tipe)
+            <option value="{{ $tipe->id }}"
+                {{ old('tipe_kamar_id', $room->tipe_kamar_id ?? '') == $tipe->id ? 'selected' : '' }}>
+                {{ $tipe->tipe_kamar }}
+            </option>
+        @endforeach
+    </select>
+    @error('tipe_kamar_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+</div>
+
 
                     <div class="col-md-6">
                         <label for="price" class="form-label fw-semibold">Harga per Malam <span class="text-danger">*</span></label>

@@ -3,38 +3,48 @@
 namespace App\Http\Controllers;
 
 use App\Models\Room;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use App\Models\TipeKamar;
 use App\Models\ActivityLog;
+use Illuminate\Http\Request;
 
 class RoomController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            $allowedRoles = ['admin', 'resepsionis'];
+            if (!auth()->check() || !in_array(auth()->user()->role, $allowedRoles)) {
+                return redirect()->route('login')->with('error', 'Akses ditolak!');
+            }
+            return $next($request);
+        })->only(['create', 'store', 'edit', 'update', 'destroy']);
+    }
+
     public function index(Request $request)
     {
         $query = Room::query();
 
-        // Pencarian berdasarkan nomor, tipe, atau status
-        if ($request->has('search') && !empty($request->search)) {
+        if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('number', 'like', '%' . $search . '%')
-                  ->orWhere('type', 'like', '%' . $search . '%')
-                  ->orWhere('status', 'like', '%' . $search . '%');
+            $query->where(function ($q) use ($search) {
+                $q->where('number', 'like', "%$search%")
+                  ->orWhereHas('tipeKamar', function ($q) use ($search) {
+                      $q->where('tipe_kamar', 'like', "%$search%");
+                  })
+                  ->orWhere('status', 'like', "%$search%");
             });
         }
 
         $statusFilter = $request->input('status_filter', 'all');
         $allowedStatuses = ['tersedia', 'terisi', 'maintenance', 'dipesan', 'all'];
-
         if (!in_array($statusFilter, $allowedStatuses)) {
             $statusFilter = 'all';
         }
-
         if ($statusFilter !== 'all') {
             $query->where('status', $statusFilter);
         }
 
-        $rooms = $query->paginate(5);
+        $rooms = $query->with('tipeKamar')->paginate(5);
         $currentStatus = $statusFilter;
 
         return view('rooms.index', compact('rooms', 'currentStatus'));
@@ -44,26 +54,30 @@ class RoomController extends Controller
     {
         $isEdit = false;
         $room = new Room();
-        return view('rooms.form', compact('isEdit', 'room'));
+        $tipeKamar = TipeKamar::all();
+        return view('rooms.form', compact('isEdit', 'room', 'tipeKamar'));
+    }
+
+    public function edit($id)
+    {
+        $isEdit = true;
+        $room = Room::findOrFail($id);
+        $tipeKamar = TipeKamar::all();
+        return view('rooms.form', compact('isEdit', 'room', 'tipeKamar'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'number' => 'required|string|max:255|unique:rooms',
-            'type' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'status' => 'required|in:tersedia,terisi,maintenance,dipesan',
+            'number' => 'required|unique:rooms',
+            'price' => 'required|numeric',
+            'status' => 'required',
             'description' => 'nullable|string',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'tipe_kamar_id' => 'nullable|exists:tipe_kamar,id',
         ]);
 
-        if ($request->hasFile('photo')) {
-            $file = $request->file('photo');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('imge'), $filename);
-            $validated['photo'] = $filename;
-        }
+        $defaultTipeId = TipeKamar::first()?->id ?? 1;
+        $validated['tipe_kamar_id'] = $validated['tipe_kamar_id'] ?? $defaultTipeId;
 
         $room = Room::create($validated);
 
@@ -75,55 +89,26 @@ class RoomController extends Controller
             'role' => auth()->user()->role
         ]);
 
-        return redirect()->route('admin.rooms.index')
-            ->with('success', 'Ruangan berhasil ditambahkan!');
-    }
-
-    public function show(Room $room)
-    {
-        return view('rooms.show', compact('room'));
-    }
-
-    public function edit(Room $room)
-    {
-        $isEdit = true;
-        return view('rooms.form', compact('room', 'isEdit'));
+        // ✅ Redirect ke route sesuai role
+        $routeName = auth()->user()->role . '.rooms.index';
+        return redirect()->route($routeName)->with('success', 'Ruangan berhasil ditambahkan!');
     }
 
     public function update(Request $request, Room $room)
     {
         $validated = $request->validate([
             'number' => 'required|string|max:255|unique:rooms,number,' . $room->id,
-            'type' => 'required|string|max:255',
+            'tipe_kamar_id' => 'nullable|exists:tipe_kamar,id',
             'price' => 'required|numeric|min:0',
             'status' => 'required|in:tersedia,terisi,maintenance,dipesan',
             'description' => 'nullable|string',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
+        $defaultTipeId = TipeKamar::first()?->id ?? 1;
+        $validated['tipe_kamar_id'] = $validated['tipe_kamar_id'] ?? $defaultTipeId;
+
         $oldData = $room->toArray();
-
-        // Hapus gambar jika checkbox di centang
-        if ($request->has('hapus_gambar')) {
-            if ($room->photo && file_exists(public_path('imge/' . $room->photo))) {
-                unlink(public_path('imge/' . $room->photo));
-            }
-            $validated['photo'] = null;
-        }
-
-        // Upload gambar baru jika ada
-        if ($request->hasFile('photo')) {
-            // Hapus gambar lama jika ada
-            if ($room->photo && file_exists(public_path('imge/' . $room->photo))) {
-                unlink(public_path('imge/' . $room->photo));
-            }
-            
-            $file = $request->file('photo');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('imge'), $filename);
-            $validated['photo'] = $filename;
-        }
-
         $room->update($validated);
 
         ActivityLog::create([
@@ -136,15 +121,21 @@ class RoomController extends Controller
             'new_values' => json_encode($validated)
         ]);
 
-        return redirect()->route(auth()->user()->role . '.rooms.index')
-            ->with('success', 'Ruangan berhasil diperbarui!');
+        // ✅ Redirect ke route sesuai role
+        $routeName = auth()->user()->role . '.rooms.index';
+        return redirect()->route($routeName)->with('success', 'Sukses mengedit data!');
     }
+
+    public function show($id)
+{
+    $room = Room::with('tipeKamar')->findOrFail($id);
+    return view('rooms.show', compact('room'));
+}
 
     public function destroy(Room $room)
     {
-        // Hapus foto jika ada
-        if ($room->photo && file_exists(public_path('imge/' . $room->photo))) {
-            unlink(public_path('imge/' . $room->photo));
+        if ($room->photo && file_exists(public_path('img/' . $room->photo))) {
+            unlink(public_path('img/' . $room->photo));
         }
 
         ActivityLog::create([
@@ -158,7 +149,8 @@ class RoomController extends Controller
 
         $room->delete();
 
-        return redirect()->route('admin.rooms.index')
-            ->with('success', 'Kamar berhasil dihapus.');
+        // ✅ Redirect ke route sesuai role
+        $routeName = auth()->user()->role . '.rooms.index';
+        return redirect()->route($routeName)->with('success', 'Kamar berhasil dihapus.');
     }
 }

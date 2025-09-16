@@ -105,7 +105,7 @@
                                     <form action="{{ route('admin.payments.destroy', $payment->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus data pembayaran?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle">
+                                        <button type="submit" class="btn btn-sm btn-delete btn-outline-danger rounded-circle">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>

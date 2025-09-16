@@ -17,12 +17,14 @@
         {{-- HEADER --}}
         <div class="card-header text-white d-flex justify-content-between align-items-center rounded-top-2" style="background: #3d3d3d">
             <h4 class="mb-0 fw-bold"><i class="fas fa-bed me-2"></i> Manajemen Kamar</h4>
-            @if (auth()->user()->role === 'admin')
+                @if (in_array(auth()->user()->role, ['admin', 'resepsionis']))
                 <a href="{{ route($prefix . '.rooms.create') }}" class="btn btn-light text-dark fw-semibold">
                     <i class="fa fa-plus me-1"></i> Tambah Kamar
                 </a>
             @endif
         </div>
+
+        
 
         {{-- FILTER --}}
         <div class="card-body border-bottom" style="background-color:rgb(243, 243, 243)">
@@ -88,7 +90,7 @@
                                 <span class="text-muted fst-italic">Tidak ada</span>
                             @endif
                         </td>
-                        <td class="fw-semibold">{{ $room->type }}</td>
+                        <td class="fw-semibold">{{ $room->tipeKamar?->tipe_kamar ?? 'Tipe tidak ditemukan' }}</td>
                         <td>{{ $room->number }}</td>
                         <td>Rp{{ number_format($room->price, 0, ',', '.') }}</td>
                         <td>
@@ -109,11 +111,11 @@
                                 <a href="{{ route($prefix . '.rooms.show', $room->id) }}" class="btn btn-sm btn-outline-info rounded-circle" title="Lihat Detail">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                @if (auth()->user()->role === 'admin')
+@if (auth()->user()->role === 'admin' || auth()->user()->role === 'resepsionis')
                                 <form action="{{ route($prefix . '.rooms.destroy', $room->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus kamar ini?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-sm btn-outline-danger rounded-circle" title="Hapus">
+                                    <button class="btn btn-sm btn-delete btn-outline-danger rounded-circle" title="Hapus">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>

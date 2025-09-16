@@ -10,6 +10,10 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    
+
 
     
 
@@ -104,6 +108,23 @@
                 display: inline-block;
             }
         }
+        
+    .swal2-popup.swal2-toast {
+        background: #fff;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        border-radius: 12px;
+        padding: 16px 20px;
+    }
+    .swal2-icon {
+        font-size: 28px !important;
+    }
+    .swal2-title {
+        font-size: 18px !important;
+        font-weight: 600;
+    }
+    .swal2-html-container {
+        font-size: 15px;
+    }
     </style>
 
     @yield('head')
@@ -204,6 +225,9 @@
                     <a href="{{ route('admin.laporan_keuangan.index') }}" class="{{ request()->routeIs('admin.laporan_keuangan.*') ? 'active' : '' }}">
                         <i class="fa fa-file-invoice-dollar me-1"></i> Laporan Keuangan
                     </a>
+                    <a href="{{ route('admin.tipe_kamar.index') }}" class="{{ request()->routeIs('admin.tipe_kamar.*') ? 'active' : '' }}">
+                        <i class="fa fa-list     me-1"></i> Manajemen Tipe Kamar
+                    </a>
                     <a href="{{ route('admin.activities.index') }}" class="{{ request()->routeIs('admin.activities.*') ? 'active' : '' }}">
                         <i class="fa fa-history me-1"></i> Aktifitas User
                     </a>
@@ -221,15 +245,18 @@
     </div>
 
     {{-- Footer --}}
-    <footer class="text-center py-3 mt-auto text-dark" style="margin-left: 250px;">
-        <div class="container">
-            <small>&copy; {{ date('Y') }} Hotel Abadi. All rights reserved.</small>
-        </div>
-    </footer>
+<footer class="text-center py-3 mt-auto text-dark" style="margin-left: 0; margin-right: 0;">
+    <div class="container-fluid">
+        <small>&copy; {{ date('Y') }} Hotel Abadi. All rights reserved.</small>
+    </div>
+</footer>
+
 
     {{-- JS --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <script>
         // Sidebar toggle untuk mobile
         document.getElementById('toggleSidebar').addEventListener('click', function () {
@@ -246,6 +273,69 @@
                 }, 150);
             });
         });
+
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // 1. NOTIFIKASI SUKSES/ERROR OTOMATIS
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                customClass: {
+                    popup: 'swal2-toast'
+                }
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: "{{ session('error') }}",
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true
+            });
+        @endif
+
+        // 2. KONFIRMASI DELETE UNIVERSAL
+        document.querySelectorAll('.btn-delete').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const form = this.closest('form');
+                const itemName = this.getAttribute('data-item-name') || 'data ini';
+
+                Swal.fire({
+                    title: 'Yakin ingin menghapus?',
+                    html: `Anda akan menghapus <b>${itemName}</b>.<br>Aksi ini tidak bisa dibatalkan!`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+
+
+
     </script>
     @yield('scripts')
 </body>

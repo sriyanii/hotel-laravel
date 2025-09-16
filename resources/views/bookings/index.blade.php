@@ -104,15 +104,20 @@
                                             class="btn btn-sm btn-outline-info rounded-circle" title="Lihat">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <form action="{{ route(auth()->user()->role . '.bookings.destroy', $booking->id) }}"
-                                                method="POST"
-                                                onsubmit="return confirm('Yakin ingin menghapus booking ini?')">
+
+                                            <!-- Form Hapus tersembunyi -->
+                                            <form id="delete-form-{{ $booking->id }}" 
+                                                  action="{{ route(auth()->user()->role . '.bookings.destroy', $booking->id) }}" 
+                                                  method="POST" style="display:none;">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="btn btn-sm btn-outline-danger rounded-circle" title="Hapus">
-                                                    <i class="fa fa-trash"></i>
-                                                </button>
                                             </form>
+
+                                            <!-- Tombol Hapus -->
+                                            <button type="button" class="btn btn-sm btn-delete btn-outline-danger rounded-circle" title="Hapus"
+                                                    onclick="confirmDelete({{ $booking->id }})">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -133,7 +138,26 @@
     </div>
 </div>
 
-<!-- Pastikan style pink juga tersedia -->
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+function confirmDelete(id) {
+    Swal.fire({
+        title: 'Yakin ingin menghapus booking ini?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Hapus',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-form-' + id).submit();
+        }
+    });
+}
+</script>
+
 <style>
     .text-pink {
         color:rgb(78, 77, 78) !important;

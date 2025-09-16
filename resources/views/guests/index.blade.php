@@ -40,11 +40,28 @@
                     </a>
                 </div>
             </form>
+            
 
             {{-- Judul --}}
             <h6 class="mb-3 text-secondary fw-bold">
                 <i class="fa-solid fa-address-book me-2"></i>List Tamu Terdaftar
             </h6>
+
+            <div class="col-12 col-md-3 text-md-end mb-3">
+                    <div class="d-flex flex-wrap justify-content-md-start gap-2">
+                <!-- <a href="{{ route('guests.calendar') }}" 
+                class="btn btn-sm btn-outline-secondary rounded-pill px-3 shadow-sm">
+                <i class="fas fa-calendar me-1"></i> Kalender
+                </a> -->
+
+                <a href="{{ route('guests.timeline') }}" 
+                class="btn btn-sm btn-outline-secondary rounded-pill px-3 shadow-sm">
+                    <i class="fas fa-timeline me-1"></i> Timeline
+                </a>
+                    </div>
+            </div>
+
+            
 
             {{-- Tabel --}}
             @if ($guests->isEmpty())
@@ -89,7 +106,7 @@
                                               onsubmit="return confirm('Yakin ingin menghapus tamu ini?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="btn btn-sm btn-outline-danger rounded-circle" title="Hapus">
+                                            <button class="btn btn-sm btn-outline-danger btn-delete rounded-circle" title="Hapus">
                                                 <i class="fa fa-trash"></i>
                                             </button>
                                         </form>

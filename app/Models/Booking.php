@@ -39,6 +39,7 @@ public function room()
     ]);
 }
 
+
     // Relasi ke user (admin/resepsionis yang buat booking)
     public function user()
     {
@@ -68,6 +69,8 @@ public function room()
     {
         return $this->check_out->format('d/m/Y');
     }
+
+    
 
     
 }
