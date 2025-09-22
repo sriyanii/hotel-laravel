@@ -70,6 +70,23 @@ public function room()
         return $this->check_out->format('d/m/Y');
     }
 
+public function facilities()
+{
+    return $this->belongsToMany(Facility::class, 'booking_facility')
+                ->withPivot('price', 'quantity', 'start_date', 'end_date')
+                ->withTimestamps();
+}
+
+    public function activeBooking()
+    {
+        $today = now()->toDateString();
+        return $this->bookings()
+            ->where('start_date', '<=', $today)
+            ->where('end_date', '>=', $today)
+            ->first();
+    }
+
+
     
 
     

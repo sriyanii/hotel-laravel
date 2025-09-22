@@ -55,15 +55,15 @@ class AdminProfileController extends Controller
 
             // Upload foto jika ada
             if ($request->hasFile('photo')) {
-                // Hapus foto lama dari public/imge jika ada
-                if ($user->photo && file_exists(public_path('imge/' . $user->photo))) {
-                    unlink(public_path('imge/' . $user->photo));
+                // Hapus foto lama dari public/image jika ada
+                if ($user->photo && file_exists(public_path('image/' . $user->photo))) {
+                    unlink(public_path('image/' . $user->photo));
                 }
 
-                // Simpan foto baru ke public/imge
+                // Simpan foto baru ke public/image
                 $file = $request->file('photo');
                 $filename = time() . '_' . $file->getClientOriginalName();
-                $file->move(public_path('imge'), $filename);
+                $file->move(public_path('image'), $filename);
 
                 $data['photo'] = $filename;
             }

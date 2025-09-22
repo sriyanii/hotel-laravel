@@ -4,10 +4,10 @@
 
 @section('content')
 <div class="container py-4">
-    <div class="card shadow rounded-2 border-0">
+    <div class="card shadow border-0">
 
         {{-- HEADER --}}
-        <div class="card-header text-white d-flex justify-content-between align-items-center rounded-top-4" style="background: #3d3d3d">
+        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: #3d3d3d">
             <h4 class="mb-0 fw-bold">
                 <i class="fas fa-credit-card me-2"></i> Daftar Pembayaran
             </h4>

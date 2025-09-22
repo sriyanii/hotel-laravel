@@ -26,7 +26,7 @@
     @endif
 
     {{-- Card Form --}}
-    <div class="card border-0 shadow rounded-4">
+    <div class="card border-0 shadow">
         <div class="card-body px-4 py-4">
             <form 
                 action="{{ isset($user) ? route('admin.users.update', $user->id) : route('admin.users.store') }}" 
@@ -95,7 +95,7 @@
                         @if(isset($user))
                             <div class="text-center mt-3">
                                 <img 
-                                    src="{{ $user->photo ? asset('imge/' . $user->photo) : asset('img/default-avatar.png') }}" 
+                                    src="{{ $user->photo ? asset('image/' . $user->photo) : asset('img/default-avatar.png') }}" 
                                     alt="Foto Resepsionis" 
                                     class="rounded-circle shadow border border-primary"
                                     style="width: 120px; height: 120px; object-fit: cover;">

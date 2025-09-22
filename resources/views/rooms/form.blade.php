@@ -105,7 +105,7 @@
                         <div class="mt-3" id="imagePreviewContainer">
                             @if ($currentPhoto)
                                 <div class="d-flex align-items-center gap-3">
-                                    <img src="{{ asset('imge/' . $currentPhoto) }}" class="img-thumbnail"
+                                    <img src="{{ asset('image/' . $currentPhoto) }}" class="img-thumbnail"
                                          style="max-width: 150px; max-height: 150px;">
                                     <div class="form-check">
                                         <input type="checkbox" name="hapus_gambar" id="hapus_gambar" class="form-check-input">

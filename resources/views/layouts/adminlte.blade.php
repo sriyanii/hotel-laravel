@@ -226,7 +226,10 @@
                         <i class="fa fa-file-invoice-dollar me-1"></i> Laporan Keuangan
                     </a>
                     <a href="{{ route('admin.tipe_kamar.index') }}" class="{{ request()->routeIs('admin.tipe_kamar.*') ? 'active' : '' }}">
-                        <i class="fa fa-list     me-1"></i> Manajemen Tipe Kamar
+                        <i class="fa fa-list me-1"></i> Manajemen Tipe Kamar
+                    </a>
+                        <a href="{{ route('admin.facilities.index') }}" class="{{ request()->routeIs('admin.tipe_kamar.*') ? 'active' : '' }}">
+                        <i class="fa fa-cogs me-1"></i> Manajemen Fasilitas
                     </a>
                     <a href="{{ route('admin.activities.index') }}" class="{{ request()->routeIs('admin.activities.*') ? 'active' : '' }}">
                         <i class="fa fa-history me-1"></i> Aktifitas User

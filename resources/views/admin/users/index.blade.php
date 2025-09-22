@@ -135,7 +135,7 @@
                             </div>
                             <div class="text-center mt-3">
                                 <img id="photoPreview" 
-                                     src="{{ isset($editUser) && $editUser->photo ? asset('imge/' . $editUser->photo) : asset('img/default-avatar.png') }}" 
+                                     src="{{ isset($editUser) && $editUser->photo ? asset('image/' . $editUser->photo) : asset('img/default-avatar.png') }}" 
                                      alt="Foto Resepsionis" 
                                      class="rounded-circle shadow border border-gray"
                                      style="width: 150px; height: 150px; object-fit: cover;">
@@ -215,7 +215,7 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>
-                                    <img src="{{ asset('imge/'.$user->photo) }}" alt="Foto" class="rounded-circle" style="width: 45px; height: 45px; object-fit: cover;">
+                                    <img src="{{ asset('image/'.$user->photo) }}" alt="Foto" class="rounded-circle" style="width: 45px; height: 45px; object-fit: cover;">
                                 </td>
                                 <td>{{ $user->name }}</td>
                                 <td>{{ $user->email }}</td>

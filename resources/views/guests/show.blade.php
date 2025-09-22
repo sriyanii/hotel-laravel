@@ -6,25 +6,23 @@
 <div class="container mt-4">
     <div class="row">
         <div class="col-12">
-            <h2 class="mb-4"><i class="fas fa-user-tag text-info"></i> Detail Tamu</h2>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-10 mx-auto">
-            <div class="card card-outline card-info shadow-sm">
-                <div class="card-header">
-                    <h5 class="card-title"><i class="fas fa-id-card"></i> Informasi Tamu</h5>
+            <div class="card shadow-sm rounded">
+                <!-- Header Card -->
+                <div class="card-header bg-dark d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0 text-white">
+                        <i class="fas fa-user-tag"></i> Detail Tamu
+                    </h5>
+                    <a href="{{ route(auth()->user()->role . '.guests.index') }}" class="btn btn-light btn-sm rounded-pill px-3">
+                        <i class="fas fa-arrow-left"></i> Kembali
+                    </a>
                 </div>
 
+                <!-- Body Card -->
                 <div class="card-body">
                     <div class="row">
                         <!-- Kolom Kiri -->
                         <div class="col-md-6">
-                           <p><strong>ID Tamu:</strong> 
-    <span class="text-muted">{{ $guest->guest_code ?? '-' }}</span>
-</p>
-
+                            <p><strong>ID Tamu:</strong> <span class="text-muted">{{ $guest->guest_code ?? '-' }}</span></p>
                             <p><strong>Nama:</strong> <span class="text-dark">{{ $guest->name }}</span></p>
                             <p><strong>Email:</strong> <span class="text-muted">{{ $guest->email ?? '-' }}</span></p>
                             <p><strong>Jenis Kelamin:</strong> 
@@ -63,17 +61,14 @@
                     @endif
                 </div>
 
-<div class="card-footer d-flex justify-content-between">
-    <a href="{{ route(auth()->user()->role . '.guests.index') }}" class="btn btn-outline-secondary rounded-pill px-4">
-        <i class="fas fa-arrow-left"></i> Kembali ke Daftar Tamu
-    </a>
-
-    @if (auth()->user()->role === 'admin' || auth()->user()->role === 'resepsionis')
-        <a href="{{ route(auth()->user()->role . '.guests.edit', $guest->id) }}" class="btn btn-primary rounded-pill px-4">
-            <i class="fas fa-edit"></i> Edit Data
-        </a>
-    @endif
-</div>
+                <!-- Footer Card -->
+                <div class="card-footer d-flex justify-content-end">
+                    @if (auth()->user()->role === 'admin' || auth()->user()->role === 'resepsionis')
+                        <a href="{{ route(auth()->user()->role . '.guests.edit', $guest->id) }}" class="btn btn-primary rounded-pill px-4">
+                            <i class="fas fa-edit"></i> Edit Data
+                        </a>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
@@ -84,6 +79,13 @@
 <style>
     .card-title i {
         margin-right: 8px;
+    }
+    .card {
+        border-radius: 12px;
+    }
+    .card-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
     }
 </style>
 @endsection

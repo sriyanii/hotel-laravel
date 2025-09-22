@@ -5,86 +5,65 @@ namespace App\Http\Controllers;
 use App\Models\Booking;
 use App\Models\Guest;
 use App\Models\Room;
+use App\Models\Facility;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Models\ActivityLog;
+use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
-    /**
-     * Tampilkan daftar booking
-     */
     public function index(Request $request)
     {
         $search = $request->get('search');
         $status = $request->get('status');
 
-        $bookings = Booking::with(['guest', 'room.tipeKamar', 'user'])
-            ->when($search, function ($query, $search) {
-                $query->whereHas('guest', fn($q) => $q->where('name', 'like', "%$search%"))
-                      ->orWhereHas('room', fn($q) => $q->where('number', 'like', "%$search%"))
-                      ->orWhere('status', 'like', "%$search%");
-            })
-            ->when($status, function ($query, $status) {
-                $query->where('status', $status);
-            })
+        $bookings = Booking::with(['guest', 'room.tipeKamar', 'user', 'facilities'])
+            ->when($search, fn($query) => $query->whereHas('guest', fn($q) => $q->where('name', 'like', "%$search%"))
+                                               ->orWhereHas('room', fn($q) => $q->where('number', 'like', "%$search%"))
+                                               ->orWhere('status', 'like', "%$search%"))
+            ->when($status, fn($query, $status) => $query->where('status', $status))
             ->paginate(5);
 
         return view('bookings.index', compact('bookings'));
     }
 
-    /**
-     * Form tambah booking
-     */
     public function create()
     {
         try {
-            $rooms = Room::with('tipeKamar')
-                ->where('status', 'tersedia')
-                ->get();
-
+            $rooms = Room::with('tipeKamar')->where('status', 'tersedia')->get();
             $guests = Guest::all();
+            $facilities = Facility::where('status', 'active')->get();
 
-            return view('bookings.form', [
-                'booking' => null,
-                'rooms' => $rooms,
-                'guests' => $guests
-            ]);
+            return view('bookings.form', compact('rooms', 'guests', 'facilities'))->with('booking', null);
         } catch (\Exception $e) {
             Log::error('Error accessing booking create form: ' . $e->getMessage());
             return back()->with('error', 'Gagal memuat form booking.');
         }
     }
 
-    /**
-     * Form edit booking
-     */
     public function edit($id)
     {
         try {
-            $booking = Booking::with('room.tipeKamar')->findOrFail($id);
-
+            $booking = Booking::with('room.tipeKamar', 'facilities')->findOrFail($id);
             $rooms = Room::with('tipeKamar')
                          ->where('status', 'tersedia')
                          ->orWhere('id', $booking->room_id)
                          ->get();
-
             $guests = Guest::all();
+            $facilities = Facility::where('status', 'active')->get();
 
-            return view('bookings.form', compact('booking', 'rooms', 'guests'));
+            return view('bookings.form', compact('booking', 'rooms', 'guests', 'facilities'));
         } catch (\Exception $e) {
             Log::error('Error accessing booking edit form: ' . $e->getMessage());
             return back()->with('error', 'Gagal memuat form edit booking.');
         }
     }
 
-    /**
-     * Tampilkan detail booking
-     */
     public function show($id)
     {
         try {
-            $booking = Booking::with(['guest', 'room.tipeKamar', 'user'])->findOrFail($id);
+            $booking = Booking::with(['guest', 'room.tipeKamar', 'user', 'facilities'])->findOrFail($id);
             return view('bookings.show', compact('booking'));
         } catch (\Exception $e) {
             Log::error('Error accessing booking details: ' . $e->getMessage());
@@ -92,15 +71,11 @@ class BookingController extends Controller
         }
     }
 
-    /**
-     * Simpan booking baru
-     */
     public function store(Request $request)
     {
         try {
             $validated = $request->validate($this->validationRules());
 
-            // Tambah tamu baru jika diinput manual
             if ($request->filled('new_guest_name')) {
                 $guest = Guest::create([
                     'name' => $request->new_guest_name,
@@ -110,26 +85,34 @@ class BookingController extends Controller
                 $validated['guest_id'] = $guest->id;
             }
 
-            // Ambil kamar
             $room = Room::with('tipeKamar')->findOrFail($validated['room_id']);
+            if ($room->status !== 'tersedia') return back()->with('error', 'Kamar ' . $room->number . ' tidak tersedia.');
 
-            // Cek ketersediaan berdasarkan status
-            if ($room->status !== 'tersedia') {
-                return back()->with('error', 'Kamar ' . $room->number . ' tidak tersedia. Silakan pilih kamar lain.');
-            }
-
-            // Simpan booking
             $validated['user_id'] = auth()->id();
             $booking = Booking::create($validated);
 
-            // Update status kamar menjadi 'terisi'
             $room->update(['status' => 'terisi']);
 
-            // Catat aktivitas
+            if ($request->filled('facilities')) {
+                $facilityData = [];
+                foreach ($request->facilities as $facilityId) {
+                    $facility = Facility::find($facilityId);
+                    if ($facility) {
+                        $facilityData[$facilityId] = [
+                            'price' => $facility->price_per_night,
+                            'start_date' => $request->facility_start_date,
+                            'end_date' => $request->facility_end_date
+                        ];
+                        $facility->update(['status' => 'inactive']);
+                    }
+                }
+                $booking->facilities()->sync($facilityData);
+            }
+
             ActivityLog::create([
                 'user_id' => auth()->id(),
                 'activity_type' => 'create',
-                'description' => 'Membuat booking baru untuk kamar ' . $room->number . ' (' . ($room->tipeKamar->tipe_kamar ?? 'Tanpa tipe') . ')',
+                'description' => 'Membuat booking baru untuk kamar ' . $room->number,
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
                 'method' => $request->method(),
@@ -139,25 +122,21 @@ class BookingController extends Controller
             ]);
 
             return redirect()->route(auth()->user()->role . '.bookings.index')
-                ->with('success', 'Booking untuk kamar ' . $room->number . ' berhasil dibuat!');
+                             ->with('success', 'Booking berhasil dibuat!');
         } catch (\Exception $e) {
             Log::error('Error creating booking: ' . $e->getMessage());
             return back()->with('error', 'Gagal membuat booking: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Update booking
-     */
     public function update(Request $request, $id)
     {
         try {
-            $booking = Booking::with('room.tipeKamar')->findOrFail($id);
+            $booking = Booking::with('room.tipeKamar', 'facilities')->findOrFail($id);
             $oldData = $booking->toArray();
 
             $validated = $request->validate($this->validationRules($id));
 
-            // Tambah tamu baru jika diinput manual
             if ($request->filled('new_guest_name')) {
                 $guest = Guest::create([
                     'name' => $request->new_guest_name,
@@ -167,28 +146,39 @@ class BookingController extends Controller
                 $validated['guest_id'] = $guest->id;
             }
 
-            // Jika kamar diganti, update status kamar lama & baru
             if ($booking->room_id != $validated['room_id']) {
                 $oldRoom = Room::find($booking->room_id);
-                if ($oldRoom) {
-                    $oldRoom->update(['status' => 'tersedia']);
-                }
+                if ($oldRoom) $oldRoom->update(['status' => 'tersedia']);
 
-                $newRoom = Room::with('tipeKamar')->findOrFail($validated['room_id']);
-                if ($newRoom->status !== 'tersedia') {
-                    return back()->with('error', 'Kamar ' . $newRoom->number . ' tidak tersedia.');
-                }
+                $newRoom = Room::findOrFail($validated['room_id']);
+                if ($newRoom->status !== 'tersedia') return back()->with('error', 'Kamar ' . $newRoom->number . ' tidak tersedia.');
                 $newRoom->update(['status' => 'terisi']);
             }
 
-            // Update booking
             $booking->update($validated);
 
-            // Catat aktivitas
+            if ($request->filled('facilities')) {
+                $facilityData = [];
+                foreach ($request->facilities as $facilityId) {
+                    $facility = Facility::find($facilityId);
+                    if ($facility) {
+                        $facilityData[$facilityId] = [
+                            'price' => $facility->price_per_night,
+                            'start_date' => $request->facility_start_date,
+                            'end_date' => $request->facility_end_date
+                        ];
+                        $facility->update(['status' => 'inactive']);
+                    }
+                }
+                $booking->facilities()->sync($facilityData);
+            } else {
+                $booking->facilities()->detach();
+            }
+
             ActivityLog::create([
                 'user_id' => auth()->id(),
                 'activity_type' => 'update',
-                'description' => 'Memperbarui booking #' . $booking->id . ' untuk kamar ' . $booking->room->number,
+                'description' => 'Memperbarui booking #' . $booking->id,
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
                 'method' => $request->method(),
@@ -199,23 +189,21 @@ class BookingController extends Controller
             ]);
 
             return redirect()->route(auth()->user()->role . '.bookings.index')
-                ->with('success', 'Booking berhasil diperbarui');
+                             ->with('success', 'Booking berhasil diperbarui');
         } catch (\Exception $e) {
             Log::error('Error updating booking: ' . $e->getMessage());
             return back()->with('error', 'Gagal memperbarui booking: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Hapus booking
-     */
     public function destroy($id)
     {
+        Log::info('DESTROY CALLED for ID: ' . $id);
+
         try {
             $booking = Booking::with('room')->findOrFail($id);
-            $bookingData = $booking->toArray();
+            Log::info('Booking found: ' . $booking->id);
 
-            // Kembalikan status kamar ke tersedia
             if ($booking->room_id) {
                 $room = Room::find($booking->room_id);
                 if ($room) {
@@ -223,33 +211,30 @@ class BookingController extends Controller
                 }
             }
 
-            // Catat aktivitas
+            DB::table('booking_facility')->where('booking_id', $booking->id)->delete();
+
             ActivityLog::create([
                 'user_id' => auth()->id(),
                 'activity_type' => 'delete',
-                'description' => 'Membatalkan booking #' . $booking->id . ' untuk kamar ' . ($booking->room->number ?? 'tidak diketahui'),
+                'description' => 'Membatalkan booking #' . $booking->id,
                 'ip_address' => request()->ip(),
                 'user_agent' => request()->userAgent(),
                 'method' => request()->method(),
                 'url' => request()->fullUrl(),
                 'role' => auth()->user()->role,
-                'old_values' => json_encode($bookingData)
+                'old_values' => json_encode($booking->toArray())
             ]);
 
-            // Hapus booking
             $booking->delete();
 
             return redirect()->route(auth()->user()->role . '.bookings.index')
-                ->with('success', 'Booking berhasil dibatalkan dan kamar dikembalikan ke status tersedia.');
+                             ->with('success', 'Booking berhasil dibatalkan.');
         } catch (\Exception $e) {
             Log::error('Error deleting booking: ' . $e->getMessage());
             return back()->with('error', 'Gagal membatalkan booking: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Rules validasi booking
-     */
     protected function validationRules($bookingId = null)
     {
         return [
@@ -258,28 +243,10 @@ class BookingController extends Controller
             'check_in' => 'required|date|after_or_equal:today',
             'check_out' => 'required|date|after:check_in',
             'status' => 'required|in:booked,checked_in,checked_out,canceled,paid',
+            'facilities' => 'nullable|array',
+            'facilities.*' => 'exists:facilities,id',
+            'facility_start_date' => 'nullable|date|after_or_equal:check_in',
+            'facility_end_date' => 'nullable|date|before_or_equal:check_out',
         ];
-    }
-
-    /**
-     * Tampilkan kalender booking
-     */
-    public function calendar()
-    {
-        $bookings = Booking::with(['guest', 'room'])
-            ->where('status', '!=', 'canceled')
-            ->whereDate('check_in', '>=', now())
-            ->get();
-
-        $events = $bookings->map(function($booking) {
-            return [
-                'title' => $booking->guest->name,
-                'start' => $booking->check_in,
-                'end' => $booking->check_out,
-                'booking_id' => $booking->id,
-            ];
-        });
-
-        return view('guests.calendar', compact('bookings', 'events'));
     }
 }

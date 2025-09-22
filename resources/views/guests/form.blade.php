@@ -8,15 +8,21 @@
 
 @section('content')
 <div class="container py-4">
-    <div class="card shadow rounded-2">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5>{{ $isEdit ? 'Edit Tamu' : 'Tambah Tamu' }}</h5>
-            <a href="{{ route(auth()->user()->role.'.guests.index') }}" class="btn btn-secondary btn-sm">Kembali</a>
+    <div class="card shadow rounded-3 border-0">
+        <!-- Header -->
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center rounded-top">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-user me-2"></i>
+                <h5 class="mb-0">{{ $isEdit ? 'Edit Tamu' : 'Tambah Tamu' }}</h5>
+            </div>
+            <a href="{{ route(auth()->user()->role.'.guests.index') }}" class="btn btn-sm btn-secondary">Kembali</a>
         </div>
-        <div class="card-body">
+
+        <!-- Body -->
+        <div class="card-body bg-light">
             @if($errors->any())
                 <div class="alert alert-danger">
-                    <ul>
+                    <ul class="mb-0">
                         @foreach($errors->all() as $err)
                             <li>{{ $err }}</li>
                         @endforeach
@@ -37,10 +43,10 @@
                         <label>Telepon <span class="text-danger">*</span></label>
                         <input type="text" name="phone" class="form-control" value="{{ old('phone', $guest->phone ?? '') }}" required placeholder="Masukkan nomor telepon">
                     </div>
-                    <div class="form-group">
-    <label for="guest_code">Kode Tamu</label>
-    <input type="text" name="guest_code" id="guest_code" class="form-control" value="{{ old('guest_code', $guest->guest_code) }}" readonly>
-</div>
+                    <div class="form-group col-md-6">
+                        <label for="guest_code">Kode Tamu</label>
+                        <input type="text" name="guest_code" id="guest_code" class="form-control" value="{{ old('guest_code', $guest->guest_code) }}" readonly>
+                    </div>
 
                     <div class="col-md-6">
                         <label>No. Identitas <span class="text-danger">*</span></label>
@@ -64,21 +70,21 @@
                         </select>
                     </div>
                     <div class="col-md-6">
-    <label>Email</label>
-    <input type="email" name="email" class="form-control" value="{{ old('email', $guest->email ?? '') }}" placeholder="Masukkan email">
-</div>
+                        <label>Email</label>
+                        <input type="email" name="email" class="form-control" value="{{ old('email', $guest->email ?? '') }}" placeholder="Masukkan email">
+                    </div>
 
-<div class="col-md-6">
-    <label>Jenis Kelamin</label>
-    <select name="gender" class="form-control">
-        <option value="">-- Pilih --</option>
-        @foreach(['male' => 'Laki-laki', 'female' => 'Perempuan', 'other' => 'Lainnya'] as $key => $label)
-            <option value="{{ $key }}" {{ old('gender', $guest->gender ?? '') == $key ? 'selected' : '' }}>{{ $label }}</option>
-        @endforeach
-    </select>
-</div>
+                    <div class="col-md-6">
+                        <label>Jenis Kelamin</label>
+                        <select name="gender" class="form-control">
+                            <option value="">-- Pilih --</option>
+                            @foreach(['male' => 'Laki-laki', 'female' => 'Perempuan', 'other' => 'Lainnya'] as $key => $label)
+                                <option value="{{ $key }}" {{ old('gender', $guest->gender ?? '') == $key ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
-<div class="col-md-6">
+                    <div class="col-md-6">
                         <label>Status Pernikahan</label>
                         <select name="marital_status" class="form-control">
                             <option value="">-- Pilih --</option>
@@ -88,33 +94,35 @@
                         </select>
                     </div>
 
-<div class="col-12">
-    <label>Alamat</label>
-    <textarea name="address" class="form-control" rows="2" placeholder="Masukkan alamat">{{ old('address', $guest->address ?? '') }}</textarea>
-</div>
+                    <div class="col-12">
+                        <label>Alamat</label>
+                        <textarea name="address" class="form-control" rows="2" placeholder="Masukkan alamat">{{ old('address', $guest->address ?? '') }}</textarea>
+                    </div>
 
-                    
                     <div class="col-12">
                         <label>Catatan / Preferensi</label>
                         <textarea name="notes" class="form-control" rows="3">{{ old('notes', $guest->notes ?? '') }}</textarea>
                     </div>
+
                     <div class="col-12">
                         <label>Foto Tamu</label>
                         <input type="file" name="photo" class="form-control">
                         @if($isEdit && $guest->photo)
                             <div class="mt-2">
-                                <img src="{{ asset('guests/'.$guest->photo) }}" style="max-width:150px;">
-                                <div class="form-check">
+                                <img src="{{ asset('guests/'.$guest->photo) }}" style="max-width:150px;" class="rounded shadow-sm border">
+                                <div class="form-check mt-2">
                                     <input type="checkbox" name="delete_photo" class="form-check-input" id="deletePhoto">
                                     <label for="deletePhoto" class="form-check-label">Hapus foto lama</label>
                                 </div>
                             </div>
                         @endif
                     </div>
-                    <div class="col-12 mt-3 text-end">
-                        <button class="btn btn-primary">{{ $isEdit ? 'Update' : 'Simpan' }}</button>
-                        <a href="{{ route(auth()->user()->role.'.guests.index') }}" class="btn btn-secondary">Batal</a>
-                    </div>
+                </div>
+
+                <!-- Tombol Simpan & Batal -->
+                <div class="mt-4 text-end">
+                    <button class="btn btn-dark">{{ $isEdit ? 'Update' : 'Simpan' }}</button>
+                    <a href="{{ route(auth()->user()->role.'.guests.index') }}" class="btn btn-secondary">Batal</a>
                 </div>
             </form>
         </div>

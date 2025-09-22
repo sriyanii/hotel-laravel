@@ -158,7 +158,7 @@
                     <div class="card-body p-3">
                         @forelse($recentUsers as $user)
                             <div class="d-flex align-items-center border-bottom py-2">
-                                <img src="{{ $user->photo ? asset('imge/' . $user->photo) : 'https://ui-avatars.com/api/?name=' . urlencode($user->name) }}" 
+                                <img src="{{ $user->photo ? asset('image/' . $user->photo) : 'https://ui-avatars.com/api/?name=' . urlencode($user->name) }}" 
                                      class="rounded-circle me-2" width="40" height="40" alt="foto">
                                 <div>
                                     <strong>{{ $user->name }}</strong><br>

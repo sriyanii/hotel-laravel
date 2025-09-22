@@ -48,8 +48,11 @@ public function tipeKamar()
     return $this->belongsTo(TipeKamar::class, 'tipe_kamar_id');
 }
 
-
-
+    public function facilities()
+    {
+        return $this->belongsToMany(Facility::class, 'room_facility', 'room_id', 'facility_id')
+                    ->withTimestamps();
+    }
 
     public function bookedRoomsCount()
     {

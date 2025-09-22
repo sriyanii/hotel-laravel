@@ -26,7 +26,7 @@
             <div class="row align-items-center g-4">
                 <div class="col-md-5 text-center">
                     @if ($room->photo)
-                        <img src="{{ asset('imge/' . $room->photo) }}"
+                        <img src="{{ asset('image/' . $room->photo) }}"
                              class="img-fluid rounded shadow-sm" 
                              style="max-height: 260px; object-fit: cover;" 
                              alt="Foto kamar">

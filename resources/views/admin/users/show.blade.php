@@ -17,7 +17,7 @@
                     <div class="mb-3">
                         <!-- Display Profile Picture or Initials -->
                         @if($user->photo)
-                            <img class="profile-user-img img-fluid img-circle" src="{{ asset('imge/' . $user->photo) }}" alt="Foto profil" style="width: 120px; height: 120px;">
+                            <img class="profile-user-img img-fluid img-circle" src="{{ asset('image/' . $user->photo) }}" alt="Foto profil" style="width: 120px; height: 120px;">
                         @else
                             <div class="profile-user-img img-fluid img-circle bg-primary d-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
                                 <span class="display-4 text-white">{{ strtoupper(substr($user->name, 0, 1)) }}</span>

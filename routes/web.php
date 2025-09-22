@@ -6,6 +6,7 @@ use App\Http\Controllers\RoomController;
 use App\Http\Controllers\GuestController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Admin\FacilityController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Resepsionis\DashboardController as ResepsionisDashboardController;
@@ -15,7 +16,6 @@ use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Resepsionis\ResepsionisProfileController; 
 use App\Http\Controllers\Admin\TipeKamarController;
 
-
 // =================== Redirect root ke login ===================
 Route::get('/', fn() => redirect()->route('login'));
 
@@ -23,7 +23,6 @@ Route::get('/', fn() => redirect()->route('login'));
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.process');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-
 
 // =================== Admin ===================
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'check.role:admin'])->group(function () {
@@ -39,21 +38,21 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'check.role:admin'])
     Route::resource('rooms', RoomController::class);
     Route::resource('guests', GuestController::class);
     Route::resource('bookings', BookingController::class);
+    Route::delete('/bookings/{id}', [BookingController::class, 'destroy'])->name('admin.bookings.destroy');
+
     Route::resource('users', UserController::class)->except('show');
     Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
     Route::resource('payments', PaymentController::class);
+    Route::resource('facilities', FacilityController::class);
 
     Route::prefix('tipe-kamar')->name('tipe_kamar.')->group(function() {
-    Route::get('/', [TipeKamarController::class, 'index'])->name('index');   
-    Route::get('/form/{id?}', [TipeKamarController::class, 'form'])->name('form');      
-    Route::get('/edit/{id?}', [TipeKamarController::class, 'edit'])->name('edit'); 
-    Route::get('/show/{id}', [TipeKamarController::class, 'show'])->name('show');  
-    Route::post('/save', [TipeKamarController::class, 'save'])->name('save');
-    Route::delete('/delete/{id}', [TipeKamarController::class, 'destroy'])->name('delete');
-
-
-});
-
+        Route::get('/', [TipeKamarController::class, 'index'])->name('index');   
+        Route::get('/form/{id?}', [TipeKamarController::class, 'form'])->name('form');      
+        Route::get('/edit/{id?}', [TipeKamarController::class, 'edit'])->name('edit'); 
+        Route::get('/show/{id}', [TipeKamarController::class, 'show'])->name('show');  
+        Route::post('/save', [TipeKamarController::class, 'save'])->name('save');
+        Route::delete('/delete/{id}', [TipeKamarController::class, 'destroy'])->name('delete');
+    });
 
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [AdminProfileController::class, 'show'])->name('show');
@@ -69,7 +68,9 @@ Route::prefix('resepsionis')->name('resepsionis.')->middleware(['auth', 'check.r
     Route::get('/dashboard', [ResepsionisDashboardController::class, 'index'])->name('dashboard');
     Route::resource('rooms', RoomController::class);
     Route::resource('guests', GuestController::class);
-    Route::resource('bookings', BookingController::class);
+    Route::resource('bookings', BookingController::class); 
+    Route::delete('/bookings/{id}', [BookingController::class, 'destroy'])->name('resepsionis.bookings.destroy');
+
     Route::resource('payments', PaymentController::class);
 
     Route::prefix('profile')->name('profile.')->group(function () {
@@ -86,19 +87,14 @@ Route::middleware(['auth', 'admin_resepsionis'])->group(function () {
     // Payment untuk Admin
     Route::prefix('admin')->name('admin.')->group(function() {
         Route::resource('payments', PaymentController::class);
-
     });
     
     // Payment untuk Resepsionis
     Route::prefix('resepsionis')->name('resepsionis.')->group(function() {
         Route::resource('payments', PaymentController::class);
-
-
     });
 
-Route::get('/guests', [GuestController::class, 'index'])->name('guests.index');
+    Route::get('/guests', [GuestController::class, 'index'])->name('guests.index');
     Route::get('/guests/calendar', [GuestController::class, 'calendar'])->name('guests.calendar');
     Route::get('/guests/timeline', [GuestController::class, 'timeline'])->name('guests.timeline');
-
-    
 });

@@ -46,7 +46,7 @@ class AdminController extends Controller
         if ($request->hasFile('photo')) {
             $file = $request->file('photo');
             $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('imge'), $filename);
+            $file->move(public_path('image'), $filename);
             $validated['photo'] = $filename;
         }
 
@@ -96,14 +96,14 @@ class AdminController extends Controller
 
         if ($request->hasFile('photo')) {
             // Hapus foto lama jika ada
-            if ($user->photo && file_exists(public_path('imge/' . $user->photo))) {
-                unlink(public_path('imge/' . $user->photo));
+            if ($user->photo && file_exists(public_path('image/' . $user->photo))) {
+                unlink(public_path('image/' . $user->photo));
             }
 
-            // Simpan foto baru ke folder public/imge
+            // Simpan foto baru ke folder public/image
             $file = $request->file('photo');
             $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('imge'), $filename);
+            $file->move(public_path('image'), $filename);
             $validated['photo'] = $filename;
         }
 
@@ -118,8 +118,8 @@ class AdminController extends Controller
     public function destroy(User $user)
     {
         // Hapus foto jika ada
-        if ($user->photo && file_exists(public_path('imge/' . $user->photo))) {
-            unlink(public_path('imge/' . $user->photo));
+        if ($user->photo && file_exists(public_path('image/' . $user->photo))) {
+            unlink(public_path('image/' . $user->photo));
         }
 
         $user->delete();
@@ -194,14 +194,14 @@ class AdminController extends Controller
 
         if ($request->hasFile('photo')) {
             // Hapus foto lama jika ada
-            if ($user->photo && file_exists(public_path('imge/' . $user->photo))) {
-                unlink(public_path('imge/' . $user->photo));
+            if ($user->photo && file_exists(public_path('image/' . $user->photo))) {
+                unlink(public_path('image/' . $user->photo));
             }
 
-            // Simpan foto baru ke folder public/imge
+            // Simpan foto baru ke folder public/image
             $file = $request->file('photo');
             $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('imge'), $filename);
+            $file->move(public_path('image'), $filename);
             $validated['photo'] = $filename;
         }
 

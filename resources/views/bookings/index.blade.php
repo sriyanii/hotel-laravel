@@ -97,27 +97,25 @@
                                     <td class="text-center">
                                         <div class="d-flex justify-content-end gap-2">
                                             <a href="{{ route(auth()->user()->role . '.bookings.edit', $booking->id) }}"
-                                            class="btn btn-sm btn-outline-warning rounded-circle" title="Edit">
+                                               class="btn btn-sm btn-outline-warning rounded-circle" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             <a href="{{ route(auth()->user()->role . '.bookings.show', $booking->id) }}"
-                                            class="btn btn-sm btn-outline-info rounded-circle" title="Lihat">
+                                               class="btn btn-sm btn-outline-info rounded-circle" title="Lihat">
                                                 <i class="fas fa-eye"></i>
                                             </a>
 
-                                            <!-- Form Hapus tersembunyi -->
-                                            <form id="delete-form-{{ $booking->id }}" 
-                                                  action="{{ route(auth()->user()->role . '.bookings.destroy', $booking->id) }}" 
-                                                  method="POST" style="display:none;">
+                                            <!-- Form Hapus -->
+                                            <form action="{{ route(auth()->user()->role . '.bookings.destroy', $booking->id) }}"
+                                                  method="POST"
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('Yakin ingin menghapus booking ini?')">
                                                 @csrf
                                                 @method('DELETE')
+                                                <button class="btn btn-sm btn-outline-danger btn-delete rounded-circle" title="Hapus">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
                                             </form>
-
-                                            <!-- Tombol Hapus -->
-                                            <button type="button" class="btn btn-sm btn-delete btn-outline-danger rounded-circle" title="Hapus"
-                                                    onclick="confirmDelete({{ $booking->id }})">
-                                                <i class="fa fa-trash"></i>
-                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -137,26 +135,6 @@
         </div>
     </div>
 </div>
-
-<!-- SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script>
-function confirmDelete(id) {
-    Swal.fire({
-        title: 'Yakin ingin menghapus booking ini?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Ya, Hapus',
-        cancelButtonText: 'Batal',
-        reverseButtons: true
-    }).then((result) => {
-        if (result.isConfirmed) {
-            document.getElementById('delete-form-' + id).submit();
-        }
-    });
-}
-</script>
 
 <style>
     .text-pink {

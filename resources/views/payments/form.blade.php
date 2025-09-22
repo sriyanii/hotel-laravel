@@ -6,49 +6,45 @@
 @endphp
 
 <div class="container py-4">
+
     <!-- Modal Konfirmasi Pembayaran -->
     <div class="modal fade" id="paymentMismatchModal" tabindex="-1" role="dialog" aria-labelledby="paymentMismatchModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content rounded-4 shadow-lg border-0">
-            <!-- HEADER -->
-            <div class="modal-header text-white rounded-top-4" style="background: #3d3d3d">
-                <h5 class="modal-title fw-bold" id="paymentMismatchModalLabel">
-                    <i class="fas fa-heart me-2"></i>
-                    Konfirmasi Pembayaran
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-dialog" role="document">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header text-white" style="background: #3d3d3d">
+                    <h5 class="modal-title fw-bold" id="paymentMismatchModalLabel">
+                        <i class="fas fa-money-check-alt me-2"></i>
+                        Konfirmasi Pembayaran
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-secondary">
+                    <p id="mismatchMessage" class="mb-0">
+                        Apakah Anda yakin ingin melanjutkan?
+                    </p>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn text-white" data-bs-dismiss="modal" style="background-color: #6c757d;">
+                        <i class="fas fa-times me-1"></i> Batal
+                    </button>
+                    <button type="button" class="btn text-white" id="confirmProceed" style="background-color: #495057;">
+                        <i class="fas fa-check me-1"></i> Lanjutkan
+                    </button>
+                </div>
             </div>
-
-            <!-- BODY -->
-            <div class="modal-body text-secondary">
-                <p id="mismatchMessage" class="mb-0">
-                    Apakah Anda yakin ingin melanjutkan?
-                </p>
-            </div>
-
-            <!-- FOOTER -->
-            <div class="modal-footer border-0">
-    <button type="button" class="btn text-white" data-bs-dismiss="modal" 
-        style="background-color: #6c757d;">
-        <i class="fas fa-times me-1"></i> Batal
-    </button>
-    <button type="button" class="btn text-white" id="confirmProceed" 
-        style="background-color: #adb5bd;">
-        <i class="fas fa-check me-1"></i> Lanjutkan
-    </button>
-</div>
-
         </div>
     </div>
-</div>
 
-
-    <div class="card shadow-sm rounded-4 border-0">
-        <div class="card-header text-white d-flex align-items-center rounded-top-2" style="background: #3d3d3d">
-            <h4 class="mb-0 fw-bold">
+    <!-- Card Transaksi -->
+    <div class="card shadow border-0">
+        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: #3d3d3d">
+            <div>
                 <i class="fas fa-cash-register me-2"></i>
-                @isset($payment->id) Edit @else Buat @endisset Transaksi
-            </h4>
+                <span class="fw-bold">@isset($payment->id) Edit @else Buat @endisset Transaksi</span>
+            </div>
+            <a href="{{ route($role . '.payments.index') }}" class="btn btn-sm btn-light">
+                <i class="fas fa-arrow-left me-1"></i> Kembali
+            </a>
         </div>
 
         <div class="card-body">
@@ -119,78 +115,49 @@
 
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="fw-semibold">Metode Pembayaran</label>
-                            <select name="method" id="payment_method" class="form-control" required>
-                                <option value="">-- Pilih Metode --</option>
-                                <option value="cash" @selected(old('method', $payment->method ?? '') == 'cash')>Cash</option>
-                                <option value="transfer" @selected(old('method', $payment->method ?? '') == 'transfer')>Transfer</option>
-                                <option value="qris" @selected(old('method', $payment->method ?? '') == 'qris')>QRIS</option>
-                            </select>
-                        </div>
+                        <label class="fw-semibold">Metode Pembayaran</label>
+                        <select name="method" id="payment_method" class="form-control" required>
+                            <option value="">-- Pilih Metode --</option>
+                            <option value="cash" @selected(old('method', $payment->method ?? '') == 'cash')>Cash</option>
+                            <option value="transfer" @selected(old('method', $payment->method ?? '') == 'transfer')>Transfer</option>
+                            <option value="qris" @selected(old('method', $payment->method ?? '') == 'qris')>QRIS</option>
+                        </select>
                     </div>
                     <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="fw-semibold">Tanggal Pembayaran</label>
-                            <input type="datetime-local" name="paid_at" class="form-control" required 
-                                   value="{{ old('paid_at', isset($payment->paid_at) ? $payment->paid_at->format('Y-m-d\TH:i') : now()->format('Y-m-d\TH:i')) }}">
-                        </div>
+                        <label class="fw-semibold">Tanggal Pembayaran</label>
+                        <input type="datetime-local" name="paid_at" class="form-control" required 
+                               value="{{ old('paid_at', isset($payment->paid_at) ? $payment->paid_at->format('Y-m-d\TH:i') : now()->format('Y-m-d\TH:i')) }}">
                     </div>
                 </div>
 
                 <div class="row mt-3">
                     <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="fw-semibold">Jumlah Bayar</label>
-                            <input type="number" name="amount" id="amount_input" class="form-control" required min="0"
-                                   value="{{ old('amount', $payment->amount ?? 0) }}">
-                            <small class="text-danger" id="amount_error" style="display:none;">Error</small>
-                        </div>
+                        <label class="fw-semibold">Jumlah Bayar</label>
+                        <input type="number" name="amount" id="amount_input" class="form-control" required min="0"
+                               value="{{ old('amount', $payment->amount ?? 0) }}">
+                        <small class="text-danger" id="amount_error" style="display:none;">Error</small>
                     </div>
                     <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="fw-semibold">Kembalian</label>
-                            <input type="text" id="change_amount" class="form-control bg-light" readonly value="Rp 0">
-                        </div>
+                        <label class="fw-semibold">Kembalian</label>
+                        <input type="text" id="change_amount" class="form-control bg-light" readonly value="Rp 0">
                     </div>
                 </div>
 
-                <div class="row mt-4">
-                    <div class="col-md-12 text-right">
-                        <div class="d-flex justify-content-between">
-                            <a href="{{ route($role . '.payments.index') }}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left mr-1"></i> Kembali
-                            </a>
-                            <button type="button" id="submit_btn" class="btn btn-outline-secondary">
-                                <i class="fas fa-save mr-1"></i> Simpan Transaksi
-                            </button>
-                        </div>
-                    </div>
+                <!-- Footer Form -->
+                <div class="mt-4 text-end">
+                    <button type="button" id="submit_btn" class="btn btn-dark me-2">
+                        <i class="fas fa-save me-1"></i> Simpan
+                    </button>
+                    <a href="{{ route($role . '.payments.index') }}" class="btn btn-secondary">
+                        <i class="fas fa-times me-1"></i> Batal
+                    </a>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-{{-- CSS Tema Pink Soft --}}
-<!-- <style>
-    .bg-pink-soft {
-        background-color: #ffe4ec !important;
-    }
-    .btn-outline-pink-soft {
-        color: #d63384;
-        border: 1px solid #d63384;
-        background-color: transparent;
-    }
-    .btn-outline-pink-soft:hover {
-        background-color: #d63384;
-        color: #fff;
-    }
-    .badge.bg-pink-soft {
-        background-color: #f8d7e0;
-    }
-</style> -->
-
+{{-- Script --}}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const bookingSelect = document.getElementById('booking_id');
@@ -298,10 +265,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    mismatchModal.on('click', '[data-dismiss="modal"]', function() {
-        mismatchModal.modal('hide');
-    });
-
     document.getElementById('confirmProceed').addEventListener('click', function() {
         mismatchModal.modal('hide');
         paymentForm.submit();
@@ -310,5 +273,3 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 @endsection
-
-

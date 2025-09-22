@@ -74,12 +74,23 @@ class RoomController extends Controller
             'status' => 'required',
             'description' => 'nullable|string',
             'tipe_kamar_id' => 'nullable|exists:tipe_kamar,id',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
         $defaultTipeId = TipeKamar::first()?->id ?? 1;
         $validated['tipe_kamar_id'] = $validated['tipe_kamar_id'] ?? $defaultTipeId;
 
+        // Simpan data dasar kamar
         $room = Room::create($validated);
+
+        // Jika ada foto, simpan ke folder dan update database
+        if ($request->hasFile('photo')) {
+            $file = $request->file('photo');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('image'), $filename);
+            $room->photo = $filename; // simpan nama file ke kolom photo
+            $room->save();
+        }
 
         ActivityLog::create([
             'user_id' => auth()->id(),
@@ -89,7 +100,6 @@ class RoomController extends Controller
             'role' => auth()->user()->role
         ]);
 
-        // ✅ Redirect ke route sesuai role
         $routeName = auth()->user()->role . '.rooms.index';
         return redirect()->route($routeName)->with('success', 'Ruangan berhasil ditambahkan!');
     }
@@ -108,8 +118,36 @@ class RoomController extends Controller
         $defaultTipeId = TipeKamar::first()?->id ?? 1;
         $validated['tipe_kamar_id'] = $validated['tipe_kamar_id'] ?? $defaultTipeId;
 
-        $oldData = $room->toArray();
+        // Simpan perubahan data dasar
         $room->update($validated);
+
+        // Jika centang hapus gambar, hapus file lama
+        if ($request->has('hapus_gambar') && $room->photo) {
+            $oldPhotoPath = public_path('image/' . $room->photo);
+            if (file_exists($oldPhotoPath)) {
+                unlink($oldPhotoPath);
+            }
+            $room->photo = null;
+            $room->save();
+        }
+
+        // Jika upload foto baru
+        if ($request->hasFile('photo')) {
+            // Hapus foto lama jika ada
+            if ($room->photo) {
+                $oldPhotoPath = public_path('image/' . $room->photo);
+                if (file_exists($oldPhotoPath)) {
+                    unlink($oldPhotoPath);
+                }
+            }
+
+            // Simpan foto baru
+            $file = $request->file('photo');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('image'), $filename);
+            $room->photo = $filename;
+            $room->save();
+        }
 
         ActivityLog::create([
             'user_id' => auth()->id(),
@@ -117,25 +155,25 @@ class RoomController extends Controller
             'description' => 'Memperbarui data kamar: ' . $room->number,
             'ip_address' => $request->ip(),
             'role' => auth()->user()->role,
-            'old_values' => json_encode($oldData),
+            'old_values' => json_encode($room->toArray()),
             'new_values' => json_encode($validated)
         ]);
 
-        // ✅ Redirect ke route sesuai role
         $routeName = auth()->user()->role . '.rooms.index';
         return redirect()->route($routeName)->with('success', 'Sukses mengedit data!');
     }
 
     public function show($id)
-{
-    $room = Room::with('tipeKamar')->findOrFail($id);
-    return view('rooms.show', compact('room'));
-}
+    {
+        $room = Room::with('tipeKamar')->findOrFail($id);
+        return view('rooms.show', compact('room'));
+    }
 
     public function destroy(Room $room)
     {
-        if ($room->photo && file_exists(public_path('img/' . $room->photo))) {
-            unlink(public_path('img/' . $room->photo));
+        // Hapus foto jika ada
+        if ($room->photo && file_exists(public_path('image/' . $room->photo))) {
+            unlink(public_path('image/' . $room->photo));
         }
 
         ActivityLog::create([
@@ -149,7 +187,6 @@ class RoomController extends Controller
 
         $room->delete();
 
-        // ✅ Redirect ke route sesuai role
         $routeName = auth()->user()->role . '.rooms.index';
         return redirect()->route($routeName)->with('success', 'Kamar berhasil dihapus.');
     }

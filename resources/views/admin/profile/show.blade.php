@@ -34,7 +34,7 @@
                     </div>
                     <div class="text-center">
                         <div class="position-relative d-inline-block mb-3">
-                            <img src="{{ auth()->user()->photo ? asset('imge/' . auth()->user()->photo) : asset('img/default-avatar.png') }}"
+                            <img src="{{ auth()->user()->photo ? asset('image/' . auth()->user()->photo) : asset('img/default-avatar.png') }}"
                                  alt="Foto Profil"
                                  class="rounded-circle img-fluid shadow"
                                  width="120" height="120"

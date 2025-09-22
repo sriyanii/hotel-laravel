@@ -85,7 +85,7 @@
                         <td>{{ $loop->iteration + ($rooms->currentPage() - 1) * $rooms->perPage() }}</td>
                         <td>
                             @if ($room->photo)
-                                <img src="{{ asset('imge/' . $room->photo) }}" class="rounded-3 shadow-sm" style="height: 60px; width: 100px; object-fit: cover;">
+                                <img src="{{ asset('image/' . $room->photo) }}" class="rounded-3 shadow-sm" style="height: 60px; width: 100px; object-fit: cover;">
                             @else
                                 <span class="text-muted fst-italic">Tidak ada</span>
                             @endif
