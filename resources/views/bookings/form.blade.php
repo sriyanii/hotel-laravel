@@ -147,8 +147,8 @@
 
                 <!-- Action Buttons -->
                 <div class="text-end mt-4">
-                    <button type="submit" class="btn btn-dark px-4">
-                        <i class="fas fa-save me-1"></i> Simpan
+                    <button type="submit" class="btn btn-dark">
+                        <i class="fas me-1"></i> Simpan
                     </button>
                     <a href="{{ route(auth()->user()->role . '.bookings.index') }}" class="btn btn-secondary px-3">
                         Batal

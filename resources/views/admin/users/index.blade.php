@@ -144,8 +144,8 @@
                     </div>
 
                     <div class="mt-4 d-flex gap-2">
-                        <button type="submit" class="btn btn-primary shadow-sm">
-                            <i class="fas fa-save me-1"></i> {{ isset($editUser) ? 'Update Data' : 'Simpan Resepsionis' }}
+                        <button type="submit" class="btn btn-dark">
+                            <i class="me-1"></i> {{ isset($editUser) ? 'Update Data' : 'Simpan' }}
                         </button>
                         <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary">Batal</a>
                     </div>

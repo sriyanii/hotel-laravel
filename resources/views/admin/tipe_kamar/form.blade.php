@@ -35,10 +35,10 @@
 
                 <div class="d-flex justify-content-end gap-2 mt-4">
                     <button type="submit" class="btn btn-dark">
-                        <i class="fas fa-save me-1"></i> Simpan
+                        <i class="me-1"></i> Simpan
                     </button>
                     <a href="{{ route('admin.tipe_kamar.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-times me-1"></i> Batal
+                        <i class="me-1"></i> Batal
                     </a>
                 </div>
             </form>

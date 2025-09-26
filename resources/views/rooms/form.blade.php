@@ -16,7 +16,7 @@
                 <i class="fas fa-bed me-2"></i>
                 {{ $isEdit ? 'Edit Kamar' : 'Tambah Kamar' }}
             </h5>
-            <a href="{{ route("$prefix.rooms.index") }}" class="btn btn-sm btn-light rounded-pill">
+            <a href="{{ route("$prefix.rooms.index") }}" class="btn btn-sm btn-secondary">
                 <i class="fas fa-arrow-left me-1"></i> Kembali
             </a>
         </div>
@@ -117,12 +117,13 @@
                     </div>
 
                     <div class="col-12 mt-4 d-flex justify-content-end gap-2">
-                        <a href="{{ route("$prefix.rooms.index") }}" class="btn btn-outline-secondary rounded-pill px-4">
-                            <i class="fas fa-times me-1"></i> Batal
-                        </a>
-                        <button type="submit" class="btn btn-primary rounded-pill px-4">
+
+                        <button type="submit" class="btn btn-dark">
                             <i class="fas fa-save me-1"></i> {{ $isEdit ? 'Update' : 'Simpan' }}
                         </button>
+                        <a href="{{ route("$prefix.rooms.index") }}" class="btn btn btn-secondary">
+                            <i class="fas fa-times me-1"></i> Batal
+                        </a>
                     </div>
                 </div>
             </form>

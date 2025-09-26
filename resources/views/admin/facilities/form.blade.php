@@ -84,11 +84,11 @@
                         </div>
 
                         {{-- Tombol --}}
-                        <div class="d-flex justify-content-end gap-3 mt-4">
-                            <button type="submit" class="btn btn-dark px-4 py-2 fw-semibold" {{ isset($facility) && $facility->isBooked() ? 'disabled' : '' }}>
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="submit" class="btn btn-dark" {{ isset($facility) && $facility->isBooked() ? 'disabled' : '' }}>
                                 {{ isset($facility) ? 'Simpan Perubahan' : 'Simpan' }}
                             </button>
-                            <a href="{{ route('admin.facilities.index') }}" class="btn btn-secondary px-4 py-2 fw-semibold">Batal</a>
+                            <a href="{{ route('admin.facilities.index') }}" class="btn btn-secondary">Batal</a>
                         </div>
                     </form>
                 </div>

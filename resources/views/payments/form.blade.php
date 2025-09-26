@@ -145,11 +145,11 @@
 
                 <!-- Footer Form -->
                 <div class="mt-4 text-end">
-                    <button type="button" id="submit_btn" class="btn btn-dark me-2">
-                        <i class="fas fa-save me-1"></i> Simpan
+                    <button type="button" id="submit_btn" class="btn btn-dark">
+                        <i class="me-1"></i> Simpan
                     </button>
                     <a href="{{ route($role . '.payments.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-times me-1"></i> Batal
+                        <i class="me-1"></i> Batal
                     </a>
                 </div>
             </form>

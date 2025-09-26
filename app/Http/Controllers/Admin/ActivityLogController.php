@@ -51,7 +51,7 @@ class ActivityLogController extends Controller
         }
 
         $activities = $query
-    ->paginate(5)
+    ->paginate(15)
     ->onEachSide(1) 
     ->appends($request->query());
 
