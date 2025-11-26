@@ -1,345 +1,723 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>@yield('title', 'Admin Panel')</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    {{-- Bootstrap & Icons --}}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-
-    
-
-
-    
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('title', 'HotelMaster')</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
     <style>
+    
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+        }
+        
         body {
-            margin: 0;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fb;
+            color: var(--dark);
         }
-
-        .wrapper {
-            display: flex;
-            min-height: 100vh;
-        }
-
+        
+        /* Sidebar */
         .sidebar {
-            width: 250px;
-            background-color: #343a40;
-            color: white;
+            width: 280px;
+            min-height: 100vh;
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
             position: fixed;
-            top: 0;
-            bottom: 0;
-            overflow-y: auto;
-            transition: all 0.5s;
-            z-index: 1040;
+            z-index: 100;
+            transition: all 0.3s;
         }
-
-        .sidebar a {
-            color: #ccc;
-            display: block;
-            padding: 10px 20px;
-            text-decoration: none;
-            white-space: nowrap;
+        
+        .sidebar-brand {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-
-        .sidebar a:hover,
-        .sidebar .active {
-            background-color: #495057;
+        
+        .sidebar-brand h3 {
+            color: white;
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+        
+        .sidebar-brand .logo-icon {
+            font-size: 2rem;
+            margin-right: 10px;
             color: #fff;
         }
-
-        .sidebar .collapse a {
-            padding-left: 40px;
-            font-size: 0.95rem;
+        
+        .nav-item {
+            position: relative;
+            margin: 5px 15px;
+            border-radius: 8px;
+            overflow: hidden;
         }
-
+        
+        .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 15px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .nav-link i {
+            width: 24px;
+            text-align: center;
+            margin-right: 10px;
+        }
+        
+        .nav-link .badge {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        /* Main Content */
         .main-content {
-            margin-left: 250px;
-            padding-top: 56px;
-            width: 100%;
-            background-color: #f8f9fa;
-            transition: margin-left 0.3s;
+            margin-left: 280px;
+            padding: 30px;
+            transition: all 0.3s;
         }
-
-        .navbar-custom {
-            background-color: #212529;
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h2 {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-menu img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+        
+        /* Role Badge */
+        .role-badge {
+            background: rgba(255,255,255,0.2);
             color: white;
-            position: fixed;
-            width: 100%;
-            z-index: 1050;
-            height: 56px;
-            top: 0;
-            left: 0;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
         }
-
-        .navbar-custom .navbar-brand {
-            color: white;
-        }
-
-        #toggleSidebar {
-            display: none;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.2rem;
-            margin-right: 1rem;
-        }
-
-        @media (max-width: 768px) {
+        
+        /* Responsive */
+        @media (max-width: 992px) {
             .sidebar {
-                left: -250px;
+                margin-left: -280px;
             }
-
+            
             .sidebar.active {
-                left: 0;
+                margin-left: 0;
             }
-
+            
             .main-content {
                 margin-left: 0;
             }
-
-            #toggleSidebar {
-                display: inline-block;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px 15px;
+            }
+            
+            .header h2 {
+                font-size: 1.5rem;
             }
         }
         
-    .swal2-popup.swal2-toast {
-        background: #fff;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        border-radius: 12px;
-        padding: 16px 20px;
-    }
-    .swal2-icon {
-        font-size: 28px !important;
-    }
-    .swal2-title {
-        font-size: 18px !important;
-        font-weight: 600;
-    }
-    .swal2-html-container {
-        font-size: 15px;
-    }
-    </style>
+        :root {
+    --primary: #3a86ff;
+    --secondary: #2667cc;
+    --dark: #1f2937;
+    --light: #f9fafb;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+}
 
-    @yield('head')
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f5f7fb;
+    color: var(--dark);
+}
+
+/* Sidebar */
+.sidebar {
+    width: 280px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, var(--primary), var(--secondary));
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    position: fixed;
+    z-index: 100;
+}
+
+.sidebar-brand {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-brand h3 {
+    color: white;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+.sidebar-brand .logo-icon {
+    font-size: 2rem;
+    margin-right: 10px;
+    color: #fff;
+}
+
+.nav-item {
+    position: relative;
+    margin: 5px 15px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.nav-link {
+    color: rgba(255,255,255,0.8);
+    padding: 12px 15px;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: white;
+    background-color: rgba(255,255,255,0.1);
+}
+
+.nav-link i {
+    width: 24px;
+    text-align: center;
+    margin-right: 10px;
+}
+
+/* Main Content */
+.main-content {
+    margin-left: 280px;
+    padding: 30px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.header h2 {
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 0;
+}
+
+/* Guest Cards */
+.guest-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+/* Guest Tabs */
+.guest-tabs .nav-link {
+    color: var(--dark);
+    border: none;
+    padding: 10px 20px;
+    font-weight: 500;
+}
+
+.guest-tabs .nav-link.active {
+    color: var(--primary);
+    border-bottom: 3px solid var(--primary);
+    background: transparent;
+}
+
+/* Guest Search */
+.guest-search {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.guest-search input {
+    padding-left: 40px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.guest-search i {
+    position: absolute;
+    left: 15px;
+    top: 12px;
+    color: #9ca3af;
+}
+
+/* Guest List */
+.guest-list {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.guest-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background-color: #f9fafb;
+    transition: all 0.3s;
+}
+
+.guest-item:hover {
+    background-color: #f3f4f6;
+    transform: translateX(5px);
+}
+
+.guest-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+}
+
+.guest-info {
+    flex: 1;
+}
+
+.guest-status {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.status-current {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.status-checkedout {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.status-vip {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+/* Guest Details Modal */
+.guest-modal .modal-header {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.guest-modal .modal-footer {
+    border-top: none;
+    padding-top: 0;
+}
+
+.guest-details {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.guest-details li {
+    padding: 10px 0;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+}
+
+.guest-details li:last-child {
+    border-bottom: none;
+}
+
+.guest-details .label {
+    width: 120px;
+    color: #6b7280;
+}
+
+.guest-details .value {
+    flex: 1;
+    font-weight: 500;
+}
+
+/* Timeline */
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #e5e7eb;
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 20px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -30px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    border: 2px solid white;
+}
+
+.timeline-date {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.timeline-content {
+    background: white;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Stats Cards */
+.stats-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+.stats-card .count {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.stats-card .label {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* New Guest Form */
+.form-section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.form-section h5 {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        position: relative;
+        min-height: auto;
+    }
+    
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+    }
+    
+    .header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .guest-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .guest-avatar {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    
+    .guest-status {
+        margin: 10px 0;
+    }
+}
+    </style>
+    @stack('css')
 </head>
 <body>
-
-    {{-- Navbar --}}
-    <nav class="navbar navbar-dark navbar-custom d-flex justify-content-between align-items-center px-3">
-        <div class="d-flex align-items-center">
-            <button id="toggleSidebar" class="d-md-none"><i class="fa fa-bars"></i></button>
-            <span class="navbar-brand mb-0">Hotel Abadi</span>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-brand d-flex align-items-center">
+            <i class="fas fa-hotel logo-icon"></i>
+            <h3>HotelMaster</h3>
         </div>
-        <div class="d-flex align-items-center">
-            <i class="fas fa-user-circle me-2"></i> {{ auth()->user()->name ?? 'Admin' }}
-            <form action="{{ route('logout') }}" method="POST" class="ms-3 mb-0">
-                @csrf
-                <button type="submit" class="btn btn-sm btn-light">Logout</button>
-            </form>
-        </div>
-    </nav>
+        
 
-    <div class="wrapper">
-        {{-- Sidebar --}}
-        <div class="sidebar" id="sidebar">
-            <h5 class="text-center text-light mb-4 mt-3">Hotel Abadi</h5>
+        
+        <ul class="nav flex-column">
+            @if(auth()->user()->role === 'admin')
+                <!-- ADMIN MENU -->
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('admin/dashboard*') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('admin/analytics*') ? 'active' : '' }}" href="{{ route('admin.analytics') }}">
+                        <i class="fas fa-chart-pie"></i> Analytics
+                        <span class="badge bg-danger rounded-pill">3</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('admin/finance*') ? 'active' : '' }}" href="{{ route('admin.finance') }}">
+                        <i class="fas fa-wallet"></i> Finance
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('admin/rooms*') ? 'active' : '' }}" href="{{ route('admin.rooms.index') }}">
+                        <i class="fas fa-bed"></i> Room Management
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('admin/users*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
+                        <i class="fas fa-users"></i> Staff Management
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('admin/bookings*') ? 'active' : '' }}" href="{{ route('admin.bookings.index') }}">
+                        <i class="fas fa-calendar-alt"></i> Bookings
+                        <span class="badge bg-success rounded-pill">5</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('admin/rate-plans*') ? 'active' : '' }}" href="{{ route('admin.rate-plans.index') }}">
+                        <i class="fas fa-calendar-day"></i> Rate Plans
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('admin/payments*') ? 'active' : '' }}" href="{{ route('admin.payments.index') }}">
+                        <i class="fas fa-file-invoice-dollar"></i> Payments & Invoices
+                    </a>
+                </li>
+<li class="nav-item">
+    <a href="#" 
+       class="nav-link {{ request()->is('admin/coupons*') ? 'active' : '' }}" 
+       data-bs-toggle="modal" 
+       data-bs-target="#couponModal">
+        <i class="fas fa-tag"></i> Coupons
+    </a>
+</li>
 
-            {{-- Profil Saya --}}
-            <a href="{{ route(auth()->user()->role . '.profile.show') }}" class="{{ 
-                request()->routeIs('admin.profile.*') || 
-                request()->routeIs('resepsionis.profile.*') ? 'active' : '' }}">
-                <i class="fa fa-user me-2"></i> Profil Saya
-            </a>
+<li class="nav-item">
+    <a href="#" class="nav-link disabled" style="opacity: 0.6; cursor: not-allowed;">
+        <i class="fas fa-cog"></i> Settings
+        <span class="ms-1 text-muted">(Coming Soon)</span>
+    </a>
+</li>
 
-            @php $role = auth()->user()->role; @endphp
-
-            {{-- Dashboard --}}
-            <a href="{{ route($role . '.dashboard') }}" class="{{ request()->routeIs($role . '.dashboard') ? 'active' : '' }}">
-                <i class="fa fa-tachometer-alt me-2"></i> Dashboard
-            </a>
-
-            {{-- Dropdown Manajemen Hotel --}}
-            <div>
-                <a class="d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#menuHotel" role="button"
-                   aria-expanded="{{ 
-                       request()->is($role . '/rooms*') || 
-                       request()->is($role . '/guests*') || 
-                       request()->is($role . '/bookings*') ? 'true' : 'false' }}"
-                   aria-controls="menuHotel">
-                    <span><i class="fa fa-hotel me-1"></i> Manajemen Hotel</span>
-                    <i class="bi {{ 
-                        request()->is($role . '/rooms*') || 
-                        request()->is($role . '/guests*') || 
-                        request()->is($role . '/bookings*') ? 'bi-chevron-up' : 'bi-chevron-down' }}">
-                    </i>
-                </a>
-                <div class="collapse {{ 
-                    request()->is($role . '/rooms*') || 
-                    request()->is($role . '/guests*') || 
-                    request()->is($role . '/bookings*') ? 'show' : '' }}" id="menuHotel">
-                    <a href="{{ route($role . '.rooms.index') }}" class="{{ request()->routeIs($role . '.rooms.*') ? 'active' : '' }}">
-                        <i class="fa fa-bed me-1"></i> Manajemen Kamar
+                
+            @else
+                <!-- RESEPSIONIS MENU -->
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('resepsionis/dashboard*') ? 'active' : '' }}" href="{{ route('resepsionis.dashboard') }}">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
                     </a>
-                    <a href="{{ route($role . '.guests.index') }}" class="{{ request()->routeIs($role . '.guests.*') ? 'active' : '' }}">
-                        <i class="fa fa-users me-1"></i> Daftar Tamu
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('resepsionis/cico*') ? 'active' : '' }}" href="{{ route('resepsionis.cico.index') }}">
+                        <i class="fas fa-calendar-check"></i> Check In/Out
                     </a>
-                    <a href="{{ route($role . '.bookings.index') }}" class="{{ request()->routeIs($role . '.bookings.*') ? 'active' : '' }}">
-                        <i class="fa fa-calendar-check me-1"></i> Booking Kamar
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('resepsionis/rooms*') ? 'active' : '' }}" href="{{ route('resepsionis.room.index') }}">
+                        <i class="fas fa-bed"></i> Room Status
                     </a>
-                    <a href="{{ route($role . '.payments.index') }}" class="{{ request()->routeIs($role . '.payments.*') ? 'active' : '' }}">
-                        <i class="fa fa-receipt me-1"></i> Transaksi
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('resepsionis/guests*') ? 'active' : '' }}" href="{{ route('resepsionis.guests.index') }}">
+                        <i class="fas fa-users"></i> Guests
+                        <span class="badge bg-danger rounded-pill">3</span>
                     </a>
-                </div>
-            </div>
-
-            {{-- Admin Only --}}
-            @if($role === 'admin')
-            <div>
-                <a class="d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#menuData" role="button"
-                   aria-expanded="{{ 
-                       request()->is('admin/users*') || 
-                       request()->is('admin/laporan_keuangan*') || 
-                       request()->is('admin/activities*') ? 'true' : 'false' }}"
-                   aria-controls="menuData">
-                    <span><i class="fa fa-database me-1"></i> Manajemen Data</span>
-                    <i class="bi {{ 
-                        request()->is('admin/users*') || 
-                        request()->is('admin/laporan_keuangan*') || 
-                        request()->is('admin/activities*') ? 'bi-chevron-up' : 'bi-chevron-down' }}">
-                    </i>
-                </a>
-                <div class="collapse {{ 
-                    request()->is('admin/users*') || 
-                    request()->is('admin/laporan_keuangan*') || 
-                    request()->is('admin/activities*') ? 'show' : '' }}" id="menuData">
-                    <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                        <i class="fa fa-user-cog me-1"></i> Manajemen User
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('resepsionis/payments*') ? 'active' : '' }}" href="{{ route('resepsionis.payments.index') }}">
+                        <i class="fas fa-receipt"></i> Invoices
                     </a>
-                    <a href="{{ route('admin.laporan_keuangan.index') }}" class="{{ request()->routeIs('admin.laporan_keuangan.*') ? 'active' : '' }}">
-                        <i class="fa fa-file-invoice-dollar me-1"></i> Laporan Keuangan
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('resepsionis/notifications*') ? 'active' : '' }}" href="{{ route('resepsionis.notifications.index') }}">
+                        <i class="fas fa-bell"></i> Notifications
                     </a>
-                    <a href="{{ route('admin.tipe_kamar.index') }}" class="{{ request()->routeIs('admin.tipe_kamar.*') ? 'active' : '' }}">
-                        <i class="fa fa-list me-1"></i> Manajemen Tipe Kamar
-                    </a>
-                        <a href="{{ route('admin.facilities.index') }}" class="{{ request()->routeIs('admin.tipe_kamar.*') ? 'active' : '' }}">
-                        <i class="fa fa-cogs me-1"></i> Manajemen Fasilitas
-                    </a>
-                    <a href="{{ route('admin.activities.index') }}" class="{{ request()->routeIs('admin.activities.*') ? 'active' : '' }}">
-                        <i class="fa fa-history me-1"></i> Aktifitas User
-                    </a>
-                </div>
-            </div>
+                </li>
             @endif
-        </div>
+        </ul>
+    </div>
 
-        {{-- Main Content --}}
-        <div class="main-content">
-            <div class="p-4">
-                @yield('content')
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <!-- <div class="header">
+            <h2>
+                <i class="fas @yield('header-icon', 'fa-tachometer-alt') me-2"></i>
+                @yield('header-title', 'Dashboard')
+            </h2>
+            <div class="user-menu">
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                        </div>
+                        <span class="ms-2">{{ auth()->user()->name }}</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownUser">
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Profile</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('logout') }}" 
+                               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                <i class="fas fa-sign-out-alt me-2"></i> Sign out
+                            </a>
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                @csrf
+                            </form>
+                        </li>
+                    </ul>
+                </div>
             </div>
+        </div> -->
+
+        <!-- Content -->
+        <div class="content">
+            @yield('content')
         </div>
     </div>
 
-    {{-- Footer --}}
-<footer class="text-center py-3 mt-auto text-dark" style="margin-left: 0; margin-right: 0;">
-    <div class="container-fluid">
-        <small>&copy; {{ date('Y') }} Hotel Abadi. All rights reserved.</small>
-    </div>
-</footer>
-
-
-    {{-- JS --}}
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
     
     <script>
         // Sidebar toggle untuk mobile
-        document.getElementById('toggleSidebar').addEventListener('click', function () {
-            document.getElementById('sidebar').classList.toggle('active');
-        });
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('active');
+        }
 
-        // Ganti ikon collapse ketika diklik
-        document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(toggle => {
-            toggle.addEventListener('click', function () {
-                const icon = this.querySelector('.bi');
-                setTimeout(() => {
-                    icon.classList.toggle('bi-chevron-up');
-                    icon.classList.toggle('bi-chevron-down');
-                }, 150);
-            });
-        });
-
-
-
-    document.addEventListener('DOMContentLoaded', function() {
-
-        // 1. NOTIFIKASI SUKSES/ERROR OTOMATIS
-        @if(session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: "{{ session('success') }}",
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                customClass: {
-                    popup: 'swal2-toast'
-                }
-            });
-        @endif
-
-        @if(session('error'))
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal!',
-                text: "{{ session('error') }}",
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 4000,
-                timerProgressBar: true
-            });
-        @endif
-
-        // 2. KONFIRMASI DELETE UNIVERSAL
-        document.querySelectorAll('.btn-delete').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const form = this.closest('form');
-                const itemName = this.getAttribute('data-item-name') || 'data ini';
-
+        // Notifikasi dan konfirmasi
+        document.addEventListener('DOMContentLoaded', function() {
+            // Notifikasi sukses/error otomatis
+            @if(session('success'))
                 Swal.fire({
-                    title: 'Yakin ingin menghapus?',
-                    html: `Anda akan menghapus <b>${itemName}</b>.<br>Aksi ini tidak bisa dibatalkan!`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Ya, Hapus!',
-                    cancelButtonText: 'Batal',
-                    reverseButtons: true
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit();
-                    }
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: "{{ session('success') }}",
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: "{{ session('error') }}",
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true
+                });
+            @endif
+
+            // Konfirmasi delete universal
+            document.querySelectorAll('.btn-delete').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const form = this.closest('form');
+                    const itemName = this.getAttribute('data-item-name') || 'data ini';
+
+                    Swal.fire({
+                        title: 'Yakin ingin menghapus?',
+                        html: `Anda akan menghapus <b>${itemName}</b>.<br>Aksi ini tidak bisa dibatalkan!`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
                 });
             });
         });
-    });
-
-
-
     </script>
+    
     @yield('scripts')
+    @stack('scripts')
 </body>
 </html>

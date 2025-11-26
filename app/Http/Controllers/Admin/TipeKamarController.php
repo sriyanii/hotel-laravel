@@ -36,26 +36,39 @@ class TipeKamarController extends Controller
         return view('admin.tipe_kamar.form', compact('tipe'));
     }
 
-    // SAVE - simpan data baru atau update
-    public function save(Request $request)
-    {
-        // Validasi inputan
-        $data = $request->validate([
-            'tipe_kamar' => 'required|string|max:50',
-            'jumlah_kamar' => 'required|integer|min:1',
-        ]);
 
-        // Menyimpan atau memperbarui data tipe kamar
-        if($request->id) {
-            $tipe = TipeKamar::findOrFail($request->id);
-            $tipe->update($data);
-        } else {
-            TipeKamar::create($data);
-        }
+public function save(Request $request)
+{
+    $request->validate([
+        'tipe_kamar' => 'required|string|max:50',
+        'jumlah_kamar' => 'required|integer|min:1',
+        'price' => 'required|numeric|min:0',
+        'kapasitas' => 'required|integer|min:1|max:10', 
+        'deskripsi' => 'nullable|string',
+        'fitur' => 'nullable|array',
+        'fitur.*' => 'string',
+    ]);
 
-        // Redirect setelah berhasil disimpan
-        return redirect()->route('admin.tipe_kamar.index')->with('success', 'Data berhasil disimpan.');
+    $data = [
+        'tipe_kamar' => $request->tipe_kamar,
+        'jumlah_kamar' => $request->jumlah_kamar,
+        'kamar_tersedia' => $request->jumlah_kamar, 
+        'price' => $request->price,
+        'kapasitas' => $request->kapasitas,
+        'deskripsi' => $request->deskripsi,
+        'fitur' => $request->fitur ? json_encode($request->fitur) : null,
+    ];
+
+    if ($request->has('id')) {
+        // Update
+        \App\Models\TipeKamar::findOrFail($request->id)->update($data);
+    } else {
+        // Create
+        \App\Models\TipeKamar::create($data);
     }
+
+    return redirect()->route('admin.rooms.index')->with('success', 'Tipe kamar berhasil disimpan.');
+}
 
     // SHOW - detail tipe kamar
     public function show($id)

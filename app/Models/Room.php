@@ -16,16 +16,31 @@ class Room extends Model
         'status',
         'photo',
         'description',
+        'capacity',
+        'floor',
         'tipe_kamar_id',
+        'room_size',
+        'bed_type',
+        'max_occupancy',
+        'features'
     ];
 
     protected $casts = [
-        'price' => 'decimal:2'
+        'price' => 'decimal:2',
+        'facilities' => 'array',
+        'features' => 'array'
     ];
 
     public function bookings()
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function currentBooking()
+    {
+        return $this->hasOne(Booking::class)
+                    ->whereIn('status', ['confirmed', 'checked_in'])
+                    ->latest();
     }
 
     public function isAvailable($checkIn, $checkOut)

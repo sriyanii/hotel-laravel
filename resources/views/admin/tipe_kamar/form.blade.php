@@ -11,7 +11,7 @@
                 <i class="fas fa-bed me-2"></i>
                 <span class="fw-bold">{{ $tipe ? 'Edit Tipe Kamar' : 'Tambah Tipe Kamar' }}</span>
             </div>
-            <a href="{{ route('admin.tipe_kamar.index') }}" class="btn btn-light btn-sm">
+            <a href="{{ route('admin.rooms.index') }}" class="btn btn-light btn-sm">
                 <i class="fas fa-arrow-left me-1"></i> Kembali
             </a>
         </div>
@@ -37,7 +37,7 @@
                     <button type="submit" class="btn btn-dark">
                         <i class="me-1"></i> Simpan
                     </button>
-                    <a href="{{ route('admin.tipe_kamar.index') }}" class="btn btn-secondary">
+                    <a href="{{ route('admin.rooms.index') }}" class="btn btn-secondary">
                         <i class="me-1"></i> Batal
                     </a>
                 </div>

@@ -12,6 +12,8 @@ class Guest extends Model
 
     protected $fillable = [
         'guest_code',
+        'first_name',      // Tambahkan ini
+        'last_name',       // Tambahkan ini
         'name',
         'phone',
         'identity_number',
@@ -22,7 +24,15 @@ class Guest extends Model
         'guest_type',
         'address',           
         'gender',            
-        'email',             
+        'email',
+        'nationality',     // Tambahkan ini
+        'city',            // Tambahkan ini
+        'country',         // Tambahkan ini
+        'profession',      // Tambahkan ini
+        'company',         // Tambahkan ini
+        'loyalty_points',  // Tambahkan ini
+        'social_account',  // Tambahkan ini
+        'health_notes',    // Tambahkan ini
     ];
 
     protected $casts = [
@@ -35,6 +45,14 @@ class Guest extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    /**
+     * Relationship with reservations
+     */
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class);
     }
 
     /**
@@ -61,5 +79,30 @@ class Guest extends Model
     public function isVip(): bool
     {
         return in_array($this->guest_type, ['vip', 'vvip']);
+    }
+
+    /**
+     * Boot method to handle creating event
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($guest) {
+            // Generate guest code if not set
+            if (empty($guest->guest_code)) {
+                $guest->guest_code = 'G' . strtoupper(substr(uniqid(), -6));
+            }
+            
+            // Combine first and last name to create full name
+            if (empty($guest->name)) {
+                $guest->name = trim($guest->first_name . ' ' . ($guest->last_name ?? ''));
+            }
+        });
+
+        static::updating(function ($guest) {
+            // Update name when first_name or last_name changes
+            $guest->name = trim($guest->first_name . ' ' . ($guest->last_name ?? ''));
+        });
     }
 }

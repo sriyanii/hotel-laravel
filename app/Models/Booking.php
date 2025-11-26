@@ -13,6 +13,8 @@ class Booking extends Model
     protected $fillable = [
         'user_id',
         'guest_id',
+        'customer_id',
+        'room_id',
         'room_id',
         'check_in',
         'check_out',
@@ -22,6 +24,7 @@ class Booking extends Model
     protected $casts = [
         'check_in' => 'datetime',
         'check_out' => 'datetime',
+        'total_price' => 'integer',
     ];
 
     // Relasi ke tamu (guest)
@@ -39,6 +42,11 @@ public function room()
     ]);
 }
 
+public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
 
     // Relasi ke user (admin/resepsionis yang buat booking)
     public function user()
@@ -47,10 +55,10 @@ public function room()
     }
 
     // Relasi ke pembayaran (payment)
-    public function payments()
-    {
-        return $this->hasOne(Payment::class);
-    }
+public function payments()
+{
+    return $this->hasMany(Payment::class);
+}
 
     // Accessor untuk durasi menginap
     public function getDurationNightsAttribute()
@@ -88,6 +96,45 @@ public function facilities()
 
 
     
+public function getPricePerNightAttribute()
+{
+    return $this->room?->tipeKamar?->price ?? 0;
+}
 
+public function getNightsAttribute()
+{
+    return $this->check_out->diffInDays($this->check_in);
+}
+
+// Helper methods
+    public function isCheckedIn()
+    {
+        return !is_null($this->checked_in_at);
+    }
+
+    public function isCheckedOut()
+    {
+        return !is_null($this->checked_out_at);
+    }
+
+    public function canCheckIn()
+    {
+        return $this->status === 'confirmed' && !$this->isCheckedIn();
+    }
+
+    public function canCheckOut()
+    {
+        return $this->isCheckedIn() && !$this->isCheckedOut();
+    }
     
+    public function bookedBy()
+{
+    return $this->belongsTo(User::class, 'user_id');
+}
+
+public function additionalFacilities()
+{
+    return $this->hasMany(BookingFacility::class, 'booking_id');
+}
+
 }

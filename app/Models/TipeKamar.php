@@ -12,11 +12,15 @@ class TipeKamar extends Model
     protected $table = 'tipe_kamar'; 
     protected $primaryKey = 'id';    
 
-    protected $fillable = [
-        'tipe_kamar',
-        'jumlah_kamar',
-        'kamar_tersedia',
-    ];
+protected $fillable = [
+    'tipe_kamar',
+    'jumlah_kamar',
+    'kamar_tersedia',
+    'price',
+    'kapasitas',
+    'deskripsi',
+    'fitur',
+];
 
     // Relationship with rooms
     public function rooms()
@@ -30,6 +34,11 @@ class TipeKamar extends Model
         // Menghitung kamar yang tersedia dengan mengecualikan status 'terisi', 'maintenance', dan 'dipesan'
         return $this->jumlah_kamar - $this->rooms()->whereIn('status', ['terisi', 'maintenance', 'dipesan'])->count();
     }
+
+    public function getBasePriceAttribute()
+{
+    return $this->rooms()->whereNull('deleted_at')->value('price') ?? 0;
+}
 
     // This method is redundant, you can remove it.
     // public function kamarTersedia()

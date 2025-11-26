@@ -4,180 +4,400 @@
 
 @section('content')
 <style>
-    body {
-        background-color: #FAF6F0; /* Cream hangat */
+    :root {
+        --primary: #3a86ff;
+        --secondary: #2667cc;
+        --dark: #1f2937;
+        --light: #f9fafb;
+        --success: #10b981;
+        --danger: #ef4444;
+        --warning: #f59e0b;
     }
-
-    .stat-card {
-        background: linear-gradient(135deg, #FAF6F0, #C9A227); /* Cream ke gold */
-        color: #4E342E; /* Cokelat tua */
+    
+    .receptionist-dashboard {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f5f7fb;
+        color: var(--dark);
+    }
+    
+    /* Header Styling */
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding: 20px 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .dashboard-header h2 {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 0;
+    }
+    
+    /* Quick Actions */
+    .quick-actions {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .quick-action-btn {
+        flex: 1;
+        min-width: 200px;
+        background: white;
         border: none;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        transition: all 0.3s;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+        display: block;
     }
-    .stat-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+    
+    .quick-action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        color: inherit;
+        text-decoration: none;
     }
-
-    .card-header.bg-white {
-        background-color: #FAF6F0 !important;
-        color: #4E342E;
+    
+    .quick-action-btn i {
+        font-size: 28px;
+        margin-bottom: 10px;
+        color: var(--primary);
+        display: block;
     }
-
-    .badge {
-        background-color: #C9A227 !important;
-        color: #4E342E;
+    
+    .quick-action-btn h5 {
+        font-weight: 600;
+        margin-bottom: 5px;
     }
-
+    
+    .quick-action-btn .text-muted {
+        font-size: 0.9rem;
+    }
+    
+    /* Cards Styling */
+    .dashboard-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        padding: 25px;
+        margin-bottom: 30px;
+        border: none;
+    }
+    
+    .dashboard-card .card-header {
+        background: transparent;
+        border-bottom: 1px solid #f3f4f6;
+        padding: 0 0 15px 0;
+        margin-bottom: 15px;
+    }
+    
+    .dashboard-card h4 {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 0;
+    }
+    
+    /* Schedule Items */
+    .schedule-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .schedule-item:last-child {
+        border-bottom: none;
+    }
+    
+    .room-status {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+    
+    .status-available {
+        background-color: var(--success);
+    }
+    
+    .status-occupied {
+        background-color: var(--danger);
+    }
+    
+    .status-cleaning {
+        background-color: var(--warning);
+    }
+    
+    /* Guest Items */
+    .guest-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .guest-item:last-child {
+        border-bottom: none;
+    }
+    
+    .guest-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 15px;
+        background: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+    }
+    
+    /* Table Styling */
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .table th {
+        background-color: #f8fafc;
+        font-weight: 600;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    /* Badge Styling */
     .badge-status {
-        background-color: #3E2723 !important;
-        color: #fff !important;
-        padding: 0.4em 0.75em;
-        font-size: 0.85rem;
+        padding: 0.5em 0.75em;
+        font-size: 0.75rem;
+        font-weight: 500;
     }
-
-    .breadcrumb-item a {
-        color: #C9A227;
+    
+    /* Stat Cards */
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border: none;
+        transition: transform 0.3s ease;
     }
-
-    /* Mobile */
-    @media (max-width: 576px) {
-        .stat-card .card-body {
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .stat-card i {
+        font-size: 2rem;
+        color: var(--primary);
+        margin-bottom: 10px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .quick-actions {
             flex-direction: column;
-            align-items: center;
-            text-align: center;
+        }
+        
+        .quick-action-btn {
+            min-width: 100%;
+        }
+        
+        .dashboard-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
         }
     }
 </style>
 
-<div class="content-header py-4 shadow-sm mb-4 rounded" style="background-color: #FAF6F0;">
+<div class="content receptionist-dashboard">
     <div class="container-fluid">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
-            <div>
-                <h1 class="m-0 fw-bold" style="color:#4E342E;">
-                    <i class="fas fa-hotel me-2"></i>Dashboard Resepsionis
-                </h1>
-                <small class="text-muted">Selamat datang kembali, {{ auth()->user()->name }}!</small>
+
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h2><i class="fas fa-tachometer-alt me-2"></i>Receptionist Dashboard</h2>
+            <div class="user-menu">
+                                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="{{ auth()->user()->photo ? asset('image/' . auth()->user()->photo) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) }}" alt="User">
+                        <span class="ms-2 d-none d-sm-inline">{{ auth()->user()->name }}</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownUser">
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Profile</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form action="{{ route('logout') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt me-2"></i> Sign out</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-<section class="content">
-    <div class="container-fluid">
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="{{ url('/resepsionis/checkin') }}" class="quick-action-btn">
+                <i class="fas fa-check-circle"></i>
+                <h5>Check In</h5>
+                <p class="text-muted">{{ $checkInsToday->count() }} pending</p>
+            </a>
+            <a href="{{ url('/resepsionis/checkout') }}" class="quick-action-btn">
+                <i class="fas fa-door-open"></i>
+                <h5>Check Out</h5>
+                <p class="text-muted">{{ $checkOutsToday->count() }} today</p>
+            </a>
+            <a href="{{ url('/resepsionis/bookings/create') }}" class="quick-action-btn">
+                <i class="fas fa-plus-circle"></i>
+                <h5>New Booking</h5>
+                <p class="text-muted">Walk-in guest</p>
+            </a>
+            <a href="{{ url('/resepsionis/rooms') }}" class="quick-action-btn">
+                <i class="fas fa-bed"></i>
+                <h5>Room Status</h5>
+                <p class="text-muted">{{ $totalRooms - $availableRooms }} unavailable</p>
+            </a>
+        </div>
 
-        {{-- Statistik --}}
+        <!-- Today's Schedule & Current Guests -->
         <div class="row">
-            @php
-                $cards = [
-                    ['label' => 'Total Kamar', 'value' => $totalRooms, 'icon' => 'bed'],
-                    ['label' => 'Kamar Tersedia', 'value' => $availableRooms, 'icon' => 'door-open'],
-                    ['label' => 'Total Tamu', 'value' => $totalGuests, 'icon' => 'users'],
-                    ['label' => 'Booking Hari Ini', 'value' => $bookingsToday, 'icon' => 'calendar-day'],
-                ];
-            @endphp
-
-            @foreach ($cards as $card)
-                <div class="col-lg-3 col-md-6 col-12 mb-4">
-                    <div class="card stat-card h-100 shadow-sm">
-                        <div class="card-body d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5 class="fw-bold">{{ $card['value'] }}</h5>
-                                <p class="mb-0">{{ $card['label'] }}</p>
-                            </div>
-                            <i class="fas fa-{{ $card['icon'] }} fa-2x opacity-75"></i>
+            <!-- Check-in Hari Ini -->
+            <div class="col-md-6">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="fas fa-sign-in-alt me-2"></i>Check-in Hari Ini</h4>
+                    </div>
+                    
+                    @forelse($checkInsToday->take(5) as $booking)
+                    <div class="schedule-item">
+                        <div>
+                            <span class="room-status status-occupied"></span>
+                            <strong>{{ $booking->guest->name ?? 'N/A' }}</strong>
+                            <p class="text-muted mb-0">Kamar {{ $booking->room->room_number ?? 'N/A' }}</p>
                         </div>
+                        <button class="btn btn-sm btn-outline-primary">Process</button>
                     </div>
-                </div>
-            @endforeach
-        </div>
-
-        {{-- Check-in & Check-out --}}
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white fw-bold">
-                        <i class="fas fa-sign-in-alt me-1" style="color:#C9A227;"></i> Check-in Hari Ini
+                    @empty
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-calendar-times fa-2x mb-2"></i>
+                        <p>Tidak ada check-in hari ini</p>
                     </div>
-                    <div class="card-body">
-                        @forelse ($checkInsToday->take(5) as $booking)
-                            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
-                                <span>{{ optional($booking->guest)->name }}</span>
-                                <span class="badge">Kamar {{ optional($booking->room)->room_number }}</span>
-                            </div>
-                        @empty
-                            <p class="text-muted">Tidak ada tamu check-in.</p>
-                        @endforelse
-                        @if ($checkInsToday->count() > 5)
-                            <p class="text-muted small mt-2 text-end">+{{ $checkInsToday->count() - 5 }} lainnya</p>
-                        @endif
-                    </div>
+                    @endforelse
                 </div>
             </div>
-
+            
+            <!-- Check-out Hari Ini -->
             <div class="col-md-6">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white fw-bold">
-                        <i class="fas fa-sign-out-alt me-1" style="color:#C9A227;"></i> Check-out Hari Ini
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="fas fa-sign-out-alt me-2"></i>Check-out Hari Ini</h4>
                     </div>
-                    <div class="card-body">
-                        @forelse ($checkOutsToday->take(5) as $booking)
-                            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
-                                <span>{{ optional($booking->guest)->name }}</span>
-                                <span class="badge">Kamar {{ optional($booking->room)->room_number }}</span>
-                            </div>
-                        @empty
-                            <p class="text-muted">Tidak ada tamu check-out.</p>
-                        @endforelse
-                        @if ($checkOutsToday->count() > 5)
-                            <p class="text-muted small mt-2 text-end">+{{ $checkOutsToday->count() - 5 }} lainnya</p>
-                        @endif
+                    
+                    @forelse($checkOutsToday->take(5) as $booking)
+                    <div class="schedule-item">
+                        <div>
+                            <span class="room-status status-occupied"></span>
+                            <strong>{{ $booking->guest->name ?? 'N/A' }}</strong>
+                            <p class="text-muted mb-0">Kamar {{ $booking->room->room_number ?? 'N/A' }}</p>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary">Process</button>
                     </div>
+                    @empty
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-calendar-times fa-2x mb-2"></i>
+                        <p>Tidak ada check-out hari ini</p>
+                    </div>
+                    @endforelse
                 </div>
             </div>
         </div>
-
-        {{-- Booking Terbaru --}}
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <strong><i class="fas fa-history me-1" style="color:#C9A227;"></i> Booking Terbaru</strong>
-                <a href="{{ route('resepsionis.bookings.index') }}" class="btn btn-sm btn-outline-primary">
-                    <i class="fas fa-eye"></i> Lihat Semua
-                </a>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead style="background-color: #FAF6F0;">
-                            <tr>
-                                <th>Nama Tamu</th>
-                                <th>Check-in</th>
-                                <th>Check-out</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($recentBookings as $booking)
+        
+        <!-- Recent Bookings -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="dashboard-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Booking Terbaru</h4>
+                        <a href="{{ url('/resepsionis/bookings/create') }}" class="btn btn-sm btn-primary">New Booking</a>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
                                 <tr>
-                                    <td>{{ optional($booking->guest)->name }}</td>
+                                    <th>ID Booking</th>
+                                    <th>Tamu</th>
+                                    <th>Kamar</th>
+                                    <th>Check In</th>
+                                    <th>Check Out</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($recentBookings as $booking)
+                                <tr>
+                                    <td>#{{ $booking->id }}</td>
+                                    <td>{{ $booking->guest->name ?? 'N/A' }}</td>
+                                    <td>{{ $booking->room->room_number ?? 'N/A' }}</td>
                                     <td>{{ \Carbon\Carbon::parse($booking->check_in)->format('d M Y') }}</td>
                                     <td>{{ \Carbon\Carbon::parse($booking->check_out)->format('d M Y') }}</td>
-                                    <td><span class="badge-status rounded-pill">{{ ucfirst(str_replace('_', ' ', $booking->status)) }}</span></td>
+                                    <td>
+                                        @php
+                                            $statusColors = [
+                                                'confirmed' => 'success',
+                                                'checked_in' => 'primary',
+                                                'checked_out' => 'secondary',
+                                                'cancelled' => 'danger',
+                                                'pending' => 'warning'
+                                            ];
+                                            $color = $statusColors[$booking->status] ?? 'secondary';
+                                        @endphp
+                                        <span class="badge bg-{{ $color }} badge-status">
+                                            {{ ucfirst(str_replace('_', ' ', $booking->status)) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url('/resepsionis/bookings/' . $booking->id) }}" class="btn btn-sm btn-outline-primary">Details</a>
+                                    </td>
                                 </tr>
-                            @empty
-                                <tr><td colspan="5" class="text-center text-muted">Tidak ada booking terbaru.</td></tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                                @empty
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-4">
+                                        <i class="fas fa-calendar-times fa-2x mb-2"></i>
+                                        <p>Tidak ada booking terbaru</p>
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        {{-- Footer Info --}}
+        <!-- Footer Info -->
         <div class="text-end mt-3 text-muted small">
             Terakhir diperbarui: {{ now()->translatedFormat('d M Y H:i') }}
         </div>
 
     </div>
-</section>
+</div>
+
+<!-- Bootstrap JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 @endsection
